@@ -1,10 +1,10 @@
-package com.smartcampus.booking_system;
+package com.smartcampus.booking;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BookingSystemApplicationTests {
+class BookingServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
