@@ -70,12 +70,7 @@ public class UserAccountService {
 
     @Transactional(readOnly = true)
     public UserProfileDto toProfile(UserAccount user) {
-        return UserProfileDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
-                .build();
+        return new UserProfileDto(user.getId(), user.getFullName(), user.getEmail(), user.getRole());
     }
 
     @Transactional(readOnly = true)
