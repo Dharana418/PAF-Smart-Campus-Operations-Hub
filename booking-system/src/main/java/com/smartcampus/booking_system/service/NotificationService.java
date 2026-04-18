@@ -44,10 +44,7 @@ public class NotificationService {
                 .toList();
 
         long unreadCount = notificationRepository.countByRecipientEmailAndIsReadFalse(email);
-        return NotificationListResponse.builder()
-                .notifications(notifications)
-                .unreadCount(unreadCount)
-                .build();
+        return new NotificationListResponse(notifications, unreadCount);
     }
 
     @Transactional
@@ -60,13 +57,13 @@ public class NotificationService {
     }
 
     private NotificationDto toDto(Notification notification) {
-        return NotificationDto.builder()
-                .id(notification.getId())
-                .title(notification.getTitle())
-                .message(notification.getMessage())
-                .type(notification.getType())
-                .isRead(notification.isRead())
-                .createdAt(notification.getCreatedAt())
-                .build();
+        return new NotificationDto(
+            notification.getId(),
+            notification.getTitle(),
+            notification.getMessage(),
+            notification.getType(),
+            notification.isRead(),
+            notification.getCreatedAt()
+        );
     }
 }
