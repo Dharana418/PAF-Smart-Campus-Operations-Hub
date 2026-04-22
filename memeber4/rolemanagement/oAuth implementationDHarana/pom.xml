@@ -66,25 +66,12 @@
         <scope>runtime</scope>
     </dependency>
 
-	<!-- MongoDB support -->
-	<dependency>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-data-mongodb</artifactId>
-	</dependency>
-
     <!-- Lombok (optional but highly recommended) -->
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <optional>true</optional>
     </dependency>
-
-	<!-- Configuration processor for @ConfigurationProperties metadata -->
-	<dependency>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-configuration-processor</artifactId>
-		<optional>true</optional>
-	</dependency>
 
 	<!-- JWT -->
 	<dependency>
