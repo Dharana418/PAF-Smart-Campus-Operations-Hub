@@ -39,7 +39,7 @@ public class NotificationController {
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<NotificationDto> markRead(
             Authentication authentication,
-            @PathVariable Long notificationId,
+            @PathVariable String notificationId,
             @RequestParam(defaultValue = "true") boolean read
     ) {
         return ResponseEntity.ok(notificationService.markRead(authentication.getName(), notificationId, read));
