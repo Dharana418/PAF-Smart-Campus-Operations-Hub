@@ -20,10 +20,21 @@ function App() {
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
   const [isLoginViewAdmin, setIsLoginViewAdmin] = useState(false);
 
-  const handleAdminLogin = (e) => {
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
-    setError('Manual admin login is disabled for security. Please use Google SSO.');
+    setError('');
+    try {
+      const response = await apiClient.post('/public/auth/dev-login', {
+        email: adminLogin.email,
+        password: adminLogin.password
+      });
+      localStorage.setItem('campus_access_token', response.data.token);
+      initializeApp();
+    } catch (err) {
+      setError('Invalid admin credentials.');
+    }
   };
+
 
   const [notificationForm, setNotificationForm] = useState({
     recipientEmail: '',
