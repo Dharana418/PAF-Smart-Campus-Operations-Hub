@@ -1,7 +1,6 @@
 # PAF-Smart-Campus-Operations-Hub
 
 Advanced implementation added for:
-
 - Google OAuth2 login integration
 - Role-based authorization (ADMIN, STAFF, STUDENT)
 - Notifications management APIs and UI
@@ -18,12 +17,12 @@ Advanced implementation added for:
 - OAuth success handler generates JWT and redirects to frontend callback
 - JWT-protected REST APIs
 - Role-based API access:
-  - `ROLE_ADMIN`: full access including role management
-  - `ROLE_STAFF`: create notifications
-  - `ROLE_STUDENT`: read notifications
+	- `ROLE_ADMIN`: full access including role management
+	- `ROLE_STAFF`: create notifications
+	- `ROLE_STUDENT`: read notifications
 - Seeded users:
-  - `admin@smartcampus.com` (`ROLE_ADMIN`)
-  - `staff@smartcampus.com` (`ROLE_STAFF`)
+	- `admin@smartcampus.com` (`ROLE_ADMIN`)
+	- `staff@smartcampus.com` (`ROLE_STAFF`)
 
 ### Main API Endpoints
 
