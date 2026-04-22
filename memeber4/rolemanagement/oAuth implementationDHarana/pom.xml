@@ -37,11 +37,7 @@
         <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- JPA (Database handling) -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
+
 
     <!-- Validation (DTO validation) -->
     <dependency>
@@ -59,12 +55,7 @@
 		<artifactId>spring-boot-starter-oauth2-client</artifactId>
 	</dependency>
 
-    <!-- H2 Database (temporary DB for development) -->
-    <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <scope>runtime</scope>
-    </dependency>
+
 
     <!-- Lombok (optional but highly recommended) -->
     <dependency>

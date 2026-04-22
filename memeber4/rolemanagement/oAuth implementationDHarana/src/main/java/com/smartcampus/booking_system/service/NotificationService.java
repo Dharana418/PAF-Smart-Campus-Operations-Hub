@@ -48,7 +48,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public NotificationDto markRead(String email, Long notificationId, boolean read) {
+    public NotificationDto markRead(String email, String notificationId, boolean read) {
         Notification notification = notificationRepository.findByIdAndRecipientEmail(notificationId, email)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
