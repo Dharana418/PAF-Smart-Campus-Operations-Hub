@@ -14,7 +14,6 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
-
   const [notificationForm, setNotificationForm] = useState({
     recipientEmail: '',
     title: '',
