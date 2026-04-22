@@ -54,7 +54,8 @@ public class UserAccountService {
         user.setProviderId(providerId);
 
         if (user.getRole() == null) {
-            user.setRole(adminEmails.contains(normalizedEmail) ? RoleType.ROLE_ADMIN : RoleType.ROLE_STUDENT);
+            long userCount = userAccountRepository.count();
+            user.setRole(adminEmails.contains(normalizedEmail) || userCount == 0 ? RoleType.ROLE_ADMIN : RoleType.ROLE_STUDENT);
         } else if (adminEmails.contains(normalizedEmail)) {
             user.setRole(RoleType.ROLE_ADMIN);
         }
