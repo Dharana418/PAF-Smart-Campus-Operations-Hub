@@ -140,6 +140,7 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
     birthday: '', 
     assignedDate: today 
   });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleRoleChange = async (email, newRole) => {
     setUpdating(email);
@@ -195,19 +196,30 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
   const handleNameChange = (e) => {
     const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
     setRegisterForm({ ...registerForm, fullName: val });
+    if (fieldErrors.fullName) setFieldErrors({ ...fieldErrors, fullName: null });
   };
 
   const handleConfirmRegister = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    const newFieldErrors = {};
 
     // Validation: 20+ Age (Born 2006 or earlier)
     if (registerForm.birthday) {
       const birthYear = new Date(registerForm.birthday).getFullYear();
       if (birthYear > 2006) {
-        setErrorMsg('Security Policy: Registry restricted to ages 20+ (Birth Year 2006 or earlier)');
-        return;
+        newFieldErrors.birthday = 'Must be 20+ years old';
       }
+    }
+
+    if (!registerForm.fullName.trim()) newFieldErrors.fullName = 'Identity name required';
+    if (!registerForm.email.trim()) newFieldErrors.email = 'Valid email required';
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      setErrorMsg('Registry rejected: Correct field violations');
+      setTimeout(() => setErrorMsg(''), 3000);
+      return;
     }
 
     setUpdating(registerForm.email);
@@ -263,8 +275,14 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
               value={registerForm.fullName}
               onChange={handleNameChange}
               required
-              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+              className={`!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14 ${fieldErrors.fullName ? 'ring-2 ring-red-500 border-transparent' : ''}`}
             />
+            {fieldErrors.fullName && (
+              <div className="mt-2 p-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg animate-fade-in flex items-center gap-2">
+                <AlertTriangle className="w-3 h-3" />
+                {fieldErrors.fullName}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Institutional Email</label>
@@ -272,10 +290,19 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
               type="email"
               placeholder="user@smartcampus.com"
               value={registerForm.email}
-              onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
+              onChange={e => {
+                setRegisterForm({ ...registerForm, email: e.target.value });
+                if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: null });
+              }}
               required
-              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+              className={`!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14 ${fieldErrors.email ? 'ring-2 ring-red-500 border-transparent' : ''}`}
             />
+            {fieldErrors.email && (
+              <div className="mt-2 p-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg animate-fade-in flex items-center gap-2">
+                <AlertTriangle className="w-3 h-3" />
+                {fieldErrors.email}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Access Level</label>
@@ -292,9 +319,18 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
             <input
               type="date"
               value={registerForm.birthday}
-              onChange={e => setRegisterForm({ ...registerForm, birthday: e.target.value })}
-              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+              onChange={e => {
+                setRegisterForm({ ...registerForm, birthday: e.target.value });
+                if (fieldErrors.birthday) setFieldErrors({ ...fieldErrors, birthday: null });
+              }}
+              className={`!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14 ${fieldErrors.birthday ? 'ring-2 ring-red-500 border-transparent' : ''}`}
             />
+            {fieldErrors.birthday && (
+              <div className="mt-2 p-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg animate-fade-in flex items-center gap-2">
+                <AlertTriangle className="w-3 h-3" />
+                {fieldErrors.birthday}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Registry Date</label>
