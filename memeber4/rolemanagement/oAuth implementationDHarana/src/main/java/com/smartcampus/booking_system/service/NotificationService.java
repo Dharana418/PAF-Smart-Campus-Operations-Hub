@@ -21,12 +21,16 @@ public class NotificationService {
     }
 
     public NotificationDto createNotification(CreateNotificationRequest request) {
-        UserAccount recipient = userAccountService.getRequiredByEmail(request.recipientEmail());
+        return createNotification(request.recipientEmail(), request.title(), request.message(), request.type());
+    }
+
+    public NotificationDto createNotification(String recipientEmail, String title, String message, com.smartcampus.booking_system.model.NotificationType type) {
+        UserAccount recipient = userAccountService.getRequiredByEmail(recipientEmail);
 
         Notification notification = new Notification();
-        notification.setTitle(request.title());
-        notification.setMessage(request.message());
-        notification.setType(request.type());
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setType(type);
         notification.setRead(false);
         notification.setRecipient(recipient);
 

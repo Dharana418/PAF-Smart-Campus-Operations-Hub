@@ -170,6 +170,16 @@ function App() {
     }
   };
 
+  const sendNotification = async (data) => {
+    try {
+      await apiClient.post('/notifications', data);
+    } catch (err) {
+      console.error('Notification failed:', err);
+      setError('Failed to send notification.');
+      throw err;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-bg-deep relative overflow-hidden">
@@ -415,6 +425,7 @@ function App() {
               onDeleteUser={deleteUser}
               onUpdateProfile={updateProfile}
               onRegisterUser={registerUser}
+              onSendNotification={sendNotification}
               onRefresh={() => loadUsersIfAdmin('ROLE_ADMIN')}
               currentUserEmail={user.email}
               adminWhitelist={[
