@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from './api/client';
+import { Bell, Users, PlusCircle, CheckCircle, Info, AlertTriangle, XOctagon, LogOut, LayoutDashboard, ShieldAlert, Key } from 'lucide-react';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
@@ -131,8 +132,15 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <p className="text-gray-400 animate-pulse text-lg">Loading smart campus workspace...</p>
+      <div className="min-h-screen flex items-center justify-center p-6 bg-bg-deep relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-1/20 rounded-full blur-[100px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-2/20 rounded-full blur-[100px]" />
+        </div>
+        <div className="flex flex-col items-center gap-4 z-10">
+          <div className="w-16 h-16 border-4 border-white/10 border-t-accent-1 rounded-full animate-spin"></div>
+          <p className="text-gray-300 animate-pulse text-lg font-heading tracking-wide">Initializing Hub...</p>
+        </div>
       </div>
     );
   }
@@ -234,157 +242,273 @@ function App() {
     );
   }
 
+  const getNotificationIcon = (type) => {
+    switch(type) {
+      case 'SUCCESS': return <CheckCircle className="text-green-400 w-5 h-5" />;
+      case 'WARNING': return <AlertTriangle className="text-yellow-400 w-5 h-5" />;
+      case 'CRITICAL': return <XOctagon className="text-red-400 w-5 h-5" />;
+      default: return <Info className="text-blue-400 w-5 h-5" />;
+    }
+  };
+
   return (
-    <main className="max-w-[1200px] mx-auto p-6 md:p-8 grid gap-6 animate-fade-in">
-      <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 bg-gradient-to-br from-[#141414cc] to-[#0a0a0acc] p-6 rounded-[20px] border border-panel-border shadow-lg backdrop-blur-md">
-        <div>
-          <p className="inline-block mb-2 uppercase tracking-widest text-xs text-accent-1 font-bold">Operations Workspace</p>
-          <h2 className="text-3xl font-semibold bg-gradient-to-br from-white to-indigo-300 bg-clip-text text-transparent">{user.fullName}</h2>
-          <p className="text-gray-400 mt-1">{user.email} | <span className="text-white font-medium">{user.role}</span></p>
+    <div className="min-h-screen bg-bg-deep text-gray-100 flex overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-1/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-2/10 rounded-full blur-[120px]" />
+      </div>
+
+      {/* Sidebar Navigation */}
+      <aside className="w-[280px] hidden md:flex flex-col border-r border-panel-border bg-black/40 backdrop-blur-xl z-10 p-6 relative">
+        <div className="flex items-center gap-3 mb-12">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center shadow-lg shadow-accent-1/20">
+            <LayoutDashboard className="text-white w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="font-heading font-bold text-lg leading-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Operations Hub</h1>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">Smart Campus</p>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <p className="m-0 text-sm font-semibold bg-white/5 border border-white/10 rounded-full px-4 py-2 text-gray-100 shadow-inner">
-            Unread: <span className="text-accent-1">{unreadCount}</span>
-          </p>
-          <button type="button" className="btn btn-secondary" onClick={logout}>
-            Sign out
+
+        <nav className="flex-1 space-y-2">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-accent-1/10 text-accent-1 font-medium transition-colors border border-accent-1/20">
+            <Bell className="w-5 h-5" />
+            Dashboard
+          </button>
+          {canManageRoles && (
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white font-medium transition-colors">
+              <ShieldAlert className="w-5 h-5" />
+              Role Management
+            </button>
+          )}
+        </nav>
+
+        <div className="mt-auto pt-6 border-t border-panel-border">
+          <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-white/5 border border-white/5">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-gray-600">
+              <span className="font-bold text-sm">{user.fullName.charAt(0)}</span>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="font-medium text-sm text-white truncate">{user.fullName}</p>
+              <p className="text-xs text-gray-400 truncate">{user.role}</p>
+            </div>
+          </div>
+          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-gray-400 hover:text-red-400 font-medium transition-colors">
+            <LogOut className="w-5 h-5" />
+            Sign Out
           </button>
         </div>
-      </header>
+      </aside>
 
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <article className="glass-card lg:col-span-2 min-h-[480px]">
-          <h3 className="text-2xl mb-2">Notifications</h3>
-          <div className="mt-5 grid gap-4">
-            {notifications.length === 0 ? <p className="text-gray-400 italic">No notifications yet. You're all caught up!</p> : null}
-            {notifications.map((item) => (
-              <div key={item.id} className={`bg-white/5 border border-panel-border border-l-4 border-l-accent-1 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 sm:items-start transition-all duration-300 hover:bg-white/10 ${item.isRead ? 'opacity-60 border-l-white/10 grayscale-[50%]' : ''}`}>
-                <div>
-                  <p className="inline-flex mb-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 text-xs rounded-full uppercase font-bold tracking-wider">{item.type}</p>
-                  <h4 className="text-lg mb-1 text-white">{item.title}</h4>
-                  <p className="text-gray-300 mb-3 leading-relaxed">{item.message}</p>
-                  <small className="text-gray-500 block">{new Date(item.createdAt).toLocaleString()}</small>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary whitespace-nowrap self-start sm:self-auto"
-                  onClick={() => markRead(item.id, !item.isRead)}
-                >
-                  {item.isRead ? 'Mark Unread' : 'Mark Read'}
-                </button>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        {canCreateNotifications ? (
-          <article className="glass-card lg:col-span-1 h-fit">
-            <h3 className="text-2xl mb-2">Broadcast</h3>
-            <form className="grid gap-5 mt-5" onSubmit={submitNotification}>
-              <label>
-                Recipient Email
-                <input
-                  type="email"
-                  placeholder="user@smartcampus.com"
-                  value={notificationForm.recipientEmail}
-                  onChange={(event) =>
-                    setNotificationForm((current) => ({ ...current, recipientEmail: event.target.value }))
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Title
-                <input
-                  placeholder="Subject of notification"
-                  value={notificationForm.title}
-                  onChange={(event) =>
-                    setNotificationForm((current) => ({ ...current, title: event.target.value }))
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Message
-                <textarea
-                  rows={4}
-                  placeholder="Type your message here..."
-                  value={notificationForm.message}
-                  onChange={(event) =>
-                    setNotificationForm((current) => ({ ...current, message: event.target.value }))
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Priority
-                <select
-                  value={notificationForm.type}
-                  onChange={(event) =>
-                    setNotificationForm((current) => ({ ...current, type: event.target.value }))
-                  }
-                >
-                  {notificationTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <button type="submit" className="btn btn-primary mt-2">Send Notification</button>
-            </form>
-          </article>
-        ) : null}
-      </section>
-
-      {canManageRoles ? (
-        <section className="glass-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl">Role Management</h3>
-            <span className="bg-accent-2/20 text-accent-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-accent-2/30">Admin Access</span>
-          </div>
-          <p className="text-gray-400 mb-6 max-w-2xl">Manage user roles across the platform. Changes are saved automatically and applied immediately.</p>
-          
-          <div className="mt-5 grid gap-3">
-            <div className="hidden md:grid md:grid-cols-[1.5fr_1.5fr_1fr] gap-4 items-center font-semibold text-gray-400 px-4 pb-2 text-sm uppercase tracking-wide">
-              <span>Name</span>
-              <span>Email</span>
-              <span>Role</span>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto z-10 scroll-smooth">
+        {/* Mobile Header */}
+        <header className="md:hidden flex items-center justify-between p-4 border-b border-panel-border bg-black/40 backdrop-blur-xl sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
+              <LayoutDashboard className="text-white w-4 h-4" />
             </div>
-            {users.map((profile) => (
-              <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1.5fr_1fr] gap-3 md:gap-4 items-center p-4 rounded-2xl bg-white/5 border border-panel-border transition-all hover:bg-white/10" key={profile.email}>
-                <div className="flex flex-col">
-                  <span className="md:hidden text-xs text-gray-500 uppercase font-bold mb-1">Name</span>
-                  <span className="text-white font-medium">{profile.fullName}</span>
+            <h1 className="font-heading font-bold text-base">Ops Hub</h1>
+          </div>
+          <button onClick={logout} className="p-2 text-gray-400 hover:text-white">
+            <LogOut className="w-5 h-5" />
+          </button>
+        </header>
+
+        <div className="p-6 md:p-10 max-w-[1200px] w-full mx-auto animate-fade-in space-y-8">
+          
+          {/* Top Stats Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-card relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-1/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium mb-1">Unread Alerts</p>
+                  <h3 className="text-4xl font-heading font-bold text-white">{unreadCount}</h3>
                 </div>
-                <div className="flex flex-col">
-                  <span className="md:hidden text-xs text-gray-500 uppercase font-bold mb-1">Email</span>
-                  <span className="text-gray-300">{profile.email}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="md:hidden text-xs text-gray-500 uppercase font-bold mb-1">Role</span>
-                  <select
-                    value={profile.role}
-                    onChange={(event) => updateUserRole(profile.email, event.target.value)}
-                    className="py-2 px-3"
-                  >
-                    {roleOptions.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
+                <div className="w-12 h-12 rounded-2xl bg-accent-1/10 flex items-center justify-center border border-accent-1/20 text-accent-1">
+                  <Bell className="w-6 h-6" />
                 </div>
               </div>
-            ))}
+            </div>
+            
+            <div className="glass-card relative overflow-hidden group md:col-span-2 flex items-center justify-between">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-2/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div>
+                <h2 className="text-2xl font-heading font-semibold text-white mb-1">Welcome back, {user.fullName.split(' ')[0]}</h2>
+                <p className="text-gray-400 text-sm">Here's what's happening across the campus today.</p>
+              </div>
+              <div className="hidden sm:block">
+                 <div className="px-4 py-2 rounded-full border border-accent-2/30 bg-accent-2/10 text-accent-2 text-sm font-bold tracking-wide uppercase">
+                   {user.role.replace('ROLE_', '')}
+                 </div>
+              </div>
+            </div>
           </div>
-        </section>
-      ) : null}
-    </main>
+
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+              <AlertTriangle className="text-red-400 w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-red-400 font-semibold text-sm">System Error</h4>
+                <p className="text-red-300/80 text-sm mt-1">{error}</p>
+                <p className="text-red-300/60 text-xs mt-2">Note: Please ensure the backend server has connected to MongoDB Atlas.</p>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Notifications Feed */}
+            <section className="xl:col-span-2 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-heading font-semibold flex items-center gap-2">
+                  Activity Feed
+                  <span className="bg-white/10 text-xs px-2.5 py-0.5 rounded-full text-gray-300 font-medium">{notifications.length}</span>
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                {notifications.length === 0 && !error && (
+                  <div className="glass-card flex flex-col items-center justify-center py-16 text-center border-dashed">
+                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-gray-500">
+                      <CheckCircle className="w-8 h-8" />
+                    </div>
+                    <h4 className="text-lg font-medium text-white mb-1">All caught up</h4>
+                    <p className="text-gray-400 text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
+                  </div>
+                )}
+                
+                {notifications.map((item) => (
+                  <div key={item.id} className={`group relative p-5 rounded-2xl border transition-all duration-300 ${item.isRead ? 'bg-panel-light border-panel-border opacity-70' : 'bg-white/10 border-white/20 shadow-lg shadow-black/20'}`}>
+                    {/* Unread dot */}
+                    {!item.isRead && <div className="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-accent-1 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
+                    
+                    <div className="flex gap-4 sm:gap-5 items-start">
+                      <div className={`mt-1 shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${item.isRead ? 'bg-black/20' : 'bg-black/40 border border-white/5 shadow-inner'}`}>
+                        {getNotificationIcon(item.type)}
+                      </div>
+                      <div className="flex-1 min-w-0 pr-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
+                          <h4 className={`text-base truncate font-medium ${item.isRead ? 'text-gray-300' : 'text-white'}`}>{item.title}</h4>
+                          <span className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
+                        </div>
+                        <p className={`text-sm leading-relaxed ${item.isRead ? 'text-gray-500' : 'text-gray-300'}`}>{item.message}</p>
+                        
+                        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            type="button"
+                            className="text-xs font-semibold uppercase tracking-wider text-accent-1 hover:text-white transition-colors"
+                            onClick={() => markRead(item.id, !item.isRead)}
+                          >
+                            {item.isRead ? 'Mark as unread' : 'Mark as read'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Right Sidebar Columns */}
+            <div className="space-y-8">
+              {canCreateNotifications && (
+                <section className="glass-card relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-1 to-accent-2" />
+                  <h3 className="text-xl font-heading font-semibold mb-6 flex items-center gap-2">
+                    <PlusCircle className="w-5 h-5 text-accent-1" />
+                    Broadcast
+                  </h3>
+                  <form className="space-y-4" onSubmit={submitNotification}>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Recipient Email</label>
+                      <input
+                        type="email"
+                        placeholder="user@smartcampus.com"
+                        value={notificationForm.recipientEmail}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, recipientEmail: e.target.value }))}
+                        required
+                        className="bg-black/30 border-white/5 focus:border-accent-1/50 focus:bg-black/50 text-sm placeholder:text-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Title</label>
+                      <input
+                        placeholder="Subject of notification"
+                        value={notificationForm.title}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, title: e.target.value }))}
+                        required
+                        className="bg-black/30 border-white/5 focus:border-accent-1/50 focus:bg-black/50 text-sm placeholder:text-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Message</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Type your message here..."
+                        value={notificationForm.message}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, message: e.target.value }))}
+                        required
+                        className="bg-black/30 border-white/5 focus:border-accent-1/50 focus:bg-black/50 text-sm resize-none placeholder:text-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Priority</label>
+                      <select
+                        value={notificationForm.type}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, type: e.target.value }))}
+                        className="bg-black/30 border-white/5 focus:border-accent-1/50 focus:bg-black/50 text-sm"
+                      >
+                        {notificationTypes.map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button type="submit" className="btn btn-primary w-full mt-2 py-3 text-sm">
+                      Send Notification
+                    </button>
+                  </form>
+                </section>
+              )}
+
+              {canManageRoles && (
+                <section className="glass-card">
+                  <h3 className="text-xl font-heading font-semibold mb-6 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-accent-2" />
+                    Access Control
+                  </h3>
+                  <div className="space-y-3">
+                    {users.map((profile) => (
+                      <div className="p-3.5 rounded-xl bg-black/20 border border-white/5 hover:bg-black/40 transition-colors" key={profile.email}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="min-w-0 pr-2">
+                            <p className="text-sm font-medium text-white truncate">{profile.fullName}</p>
+                            <p className="text-xs text-gray-500 truncate">{profile.email}</p>
+                          </div>
+                        </div>
+                        <select
+                          value={profile.role}
+                          onChange={(e) => updateUserRole(profile.email, e.target.value)}
+                          className="w-full py-2 px-3 text-xs font-medium uppercase tracking-wider bg-black/40 border-white/10 text-gray-300"
+                        >
+                          {roleOptions.map(role => (
+                            <option key={role} value={role}>{role.replace('ROLE_', '')}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                    {users.length === 0 && !error && (
+                       <p className="text-sm text-gray-500 italic text-center py-4">No users loaded.</p>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
 

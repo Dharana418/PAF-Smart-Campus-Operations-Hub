@@ -7,7 +7,7 @@ import com.smartcampus.booking_system.model.Notification;
 import com.smartcampus.booking_system.model.UserAccount;
 import com.smartcampus.booking_system.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationService {
@@ -20,7 +20,6 @@ public class NotificationService {
         this.userAccountService = userAccountService;
     }
 
-    @Transactional
     public NotificationDto createNotification(CreateNotificationRequest request) {
         UserAccount recipient = userAccountService.getRequiredByEmail(request.recipientEmail());
 
@@ -35,7 +34,6 @@ public class NotificationService {
         return toDto(saved);
     }
 
-    @Transactional(readOnly = true)
     public NotificationListResponse getForUser(String email) {
         java.util.List<NotificationDto> notifications = notificationRepository
                 .findByRecipientEmailOrderByCreatedAtDesc(email)
@@ -47,7 +45,6 @@ public class NotificationService {
         return new NotificationListResponse(notifications, unreadCount);
     }
 
-    @Transactional
     public NotificationDto markRead(String email, String notificationId, boolean read) {
         Notification notification = notificationRepository.findByIdAndRecipientEmail(notificationId, email)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));

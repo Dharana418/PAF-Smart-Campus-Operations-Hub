@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserAccountService {
@@ -31,7 +30,6 @@ public class UserAccountService {
                 .collect(Collectors.toSet());
     }
 
-    @Transactional
     public UserAccount processGoogleUser(OAuth2User oauthUser) {
         String email = oauthUser.getAttribute("email");
         if (email == null || email.isBlank()) {
@@ -63,23 +61,19 @@ public class UserAccountService {
         return userAccountRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
     public UserAccount getRequiredByEmail(String email) {
         return userAccountRepository.findByEmail(email.toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
     }
 
-    @Transactional(readOnly = true)
     public UserProfileDto toProfile(UserAccount user) {
         return new UserProfileDto(user.getId(), user.getFullName(), user.getEmail(), user.getRole());
     }
 
-    @Transactional(readOnly = true)
     public java.util.List<UserProfileDto> getAllProfiles() {
         return userAccountRepository.findAll().stream().map(this::toProfile).toList();
     }
 
-    @Transactional
     public UserProfileDto updateRole(String email, RoleType role) {
         UserAccount user = getRequiredByEmail(email);
         user.setRole(role);
