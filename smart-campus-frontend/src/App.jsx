@@ -81,7 +81,8 @@ function App() {
     recipientEmail: '',
     title: '',
     message: '',
-    type: 'INFO'
+    type: 'INFO',
+    isBroadcast: false
   });
 
   const canCreateNotifications = useMemo(
@@ -577,17 +578,30 @@ function App() {
                     Global Broadcast
                   </h3>
                   <form className="space-y-4" onSubmit={submitNotification}>
-                    <div>
-                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
+                    <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100">
                       <input
-                        type="email"
-                        placeholder="user@smartcampus.com"
-                        value={notificationForm.recipientEmail}
-                        onChange={(e) => setNotificationForm(c => ({ ...c, recipientEmail: e.target.value }))}
-                        required
-                        className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black"
+                        type="checkbox"
+                        id="isBroadcast"
+                        checked={notificationForm.isBroadcast}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, isBroadcast: e.target.checked, recipientEmail: e.target.checked ? '' : c.recipientEmail }))}
+                        className="w-5 h-5 rounded-lg border-2 border-gray-200 text-accent-1 focus:ring-accent-1 cursor-pointer"
                       />
+                      <label htmlFor="isBroadcast" className="text-xs font-black text-gray-900 uppercase tracking-widest cursor-pointer">Broadcast to all users</label>
                     </div>
+
+                    {!notificationForm.isBroadcast && (
+                      <div className="animate-fade-in">
+                        <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
+                        <input
+                          type="email"
+                          placeholder="user@smartcampus.com"
+                          value={notificationForm.recipientEmail}
+                          onChange={(e) => setNotificationForm(c => ({ ...c, recipientEmail: e.target.value }))}
+                          required={!notificationForm.isBroadcast}
+                          className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black mb-4"
+                        />
+                      </div>
+                    )}
                     <div>
                       <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Title</label>
                       <input
