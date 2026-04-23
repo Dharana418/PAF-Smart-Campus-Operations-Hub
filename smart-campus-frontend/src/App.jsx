@@ -5,10 +5,11 @@ import { Bell, Users, PlusCircle, CheckCircle, Info, AlertTriangle, XOctagon, Lo
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
 
-const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
+const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT', 'ROLE_TECHNICIAN'];
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
 import bgImage from '../Gemini_Generated_Image_xom0dcxom0dcxom0 (2).png';
+import dashboardBg from './assets/dashboard-bg.png';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -252,11 +253,19 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-deep text-gray-100 flex overflow-hidden">
+    <div 
+      className="min-h-screen text-gray-100 flex overflow-hidden relative"
+      style={{
+        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${dashboardBg}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       {/* Decorative background elements */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-1/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-2/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-1/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-2/20 rounded-full blur-[120px]" />
       </div>
 
       {/* Sidebar Navigation */}
@@ -484,7 +493,11 @@ function App() {
                         <div className="flex justify-between items-start mb-3">
                           <div className="min-w-0 pr-2">
                             <p className="text-sm font-medium text-white truncate">{profile.fullName}</p>
-                            <p className="text-xs text-gray-500 truncate">{profile.email}</p>
+                            <p className="text-xs text-gray-400 truncate mt-0.5"><span className="text-gray-500">Username:</span> {profile.email}</p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wider"><span className="text-gray-600 font-bold">DOB:</span> {profile.birthday || 'N/A'}</p>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wider"><span className="text-gray-600 font-bold">Assigned:</span> {profile.assignedDate || 'N/A'}</p>
+                            </div>
                           </div>
                         </div>
                         <select
