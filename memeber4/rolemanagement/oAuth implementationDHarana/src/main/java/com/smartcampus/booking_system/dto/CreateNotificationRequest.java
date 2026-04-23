@@ -9,6 +9,7 @@ public record CreateNotificationRequest(
         @NotBlank String title,
         @NotBlank String message,
         @NotNull NotificationType type,
-        @NotBlank @Email String recipientEmail
+        String recipientEmail,
+        boolean isBroadcast
 ) {
 }

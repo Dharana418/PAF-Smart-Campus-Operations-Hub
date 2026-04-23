@@ -21,6 +21,22 @@ public class NotificationService {
     }
 
     public NotificationDto createNotification(CreateNotificationRequest request) {
+        if (request.isBroadcast()) {
+            java.util.List<UserAccount> allUsers = userAccountService.getAllUsersRaw();
+            for (UserAccount user : allUsers) {
+                Notification notification = new Notification();
+                notification.setTitle(request.title());
+                notification.setMessage(request.message());
+                notification.setType(request.type());
+                notification.setRead(false);
+                notification.setBroadcast(true);
+                notification.setRecipient(user);
+                notificationRepository.save(notification);
+            }
+            // Return a dummy DTO for the response (since we created many)
+            return new NotificationDto("broadcast", request.title(), request.message(), request.type(), false, java.time.LocalDateTime.now());
+        }
+
         UserAccount recipient = userAccountService.getRequiredByEmail(request.recipientEmail());
 
         Notification notification = new Notification();
@@ -28,6 +44,7 @@ public class NotificationService {
         notification.setMessage(request.message());
         notification.setType(request.type());
         notification.setRead(false);
+        notification.setBroadcast(false);
         notification.setRecipient(recipient);
 
         Notification saved = notificationRepository.save(notification);

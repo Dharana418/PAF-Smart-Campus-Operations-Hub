@@ -15,6 +15,7 @@ public class Notification {
     private String message;
     private NotificationType type;
     private boolean isRead;
+    private boolean isBroadcast;
     private LocalDateTime createdAt;
 
     @DBRef
@@ -22,6 +23,15 @@ public class Notification {
 
     public Notification() {
         this.createdAt = LocalDateTime.now();
+        this.isBroadcast = false;
+    }
+
+    public boolean isBroadcast() {
+        return isBroadcast;
+    }
+
+    public void setBroadcast(boolean broadcast) {
+        isBroadcast = broadcast;
     }
 
     public String getId() {
