@@ -231,7 +231,11 @@ function App() {
           backgroundPosition: 'center'
         }}
       >
-        <div className="bg-white/95 backdrop-blur-3xl w-full max-w-[480px] text-center px-9 py-12 relative overflow-hidden rounded-[40px] shadow-2xl border border-white/20">
+        {/* Decorative elements */}
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-1/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-2/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+
+        <div className="glass-card w-full max-w-[500px] text-center relative z-10 animate-fade-in">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-1 to-transparent"></div>
           <p className="inline-block mb-3 uppercase tracking-[0.3em] text-xs text-accent-1 font-black">Smart Campus Operations Hub</p>
           <h1 className="text-5xl mb-6 font-black text-gray-900 uppercase tracking-tighter">Secure Access Portal</h1>
