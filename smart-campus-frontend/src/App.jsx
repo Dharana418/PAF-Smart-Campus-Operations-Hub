@@ -40,6 +40,7 @@ import {
 } from 'recharts';
 import RoleManagementPage from './components/RoleManagementPage';
 import SentNotificationsPage from './components/SentNotificationsPage';
+import LandingPage from './components/LandingPage';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
@@ -57,6 +58,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
   const [activePage, setActivePage] = useState('dashboard');
+  const [showLogin, setShowLogin] = useState(false);
 
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
   const [isLoginViewAdmin, setIsLoginViewAdmin] = useState(false);
@@ -236,15 +238,31 @@ function App() {
   }
 
   if (!user) {
+    if (!showLogin) {
+      return <LandingPage onEnterPortal={() => setShowLogin(true)} />;
+    }
+
     return (
       <div
-        className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-        style={{
-          backgroundImage: `radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%), url("${premiumBg}")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
+        className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#050505]"
       >
+        <button 
+          onClick={() => setShowLogin(false)}
+          className="fixed top-8 left-8 z-50 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
+        >
+          <ArrowRight className="w-4 h-4 rotate-180" />
+          Back to Terminal
+        </button>
+        
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 z-0 opacity-40"
+          style={{
+            backgroundImage: `radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.9) 100%), url("${premiumBg}")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
         {/* Decorative elements */}
         <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-1/10 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-2/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
