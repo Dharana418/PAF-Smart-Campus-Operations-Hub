@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle, XOctagon } from 'lucide-react';
 
-const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT', 'ROLE_TECHNICIAN'];
+const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 
 const roleConfig = {
   ROLE_ADMIN: {
@@ -30,15 +30,6 @@ const roleConfig = {
     border: 'border-green-500/20',
     dot: 'bg-green-500',
     gradient: 'from-green-500 to-green-700',
-  },
-  ROLE_TECHNICIAN: {
-    label: 'Technician',
-    icon: Wrench,
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-400',
-    border: 'border-orange-500/20',
-    dot: 'bg-orange-500',
-    gradient: 'from-orange-500 to-orange-700',
   },
 };
 

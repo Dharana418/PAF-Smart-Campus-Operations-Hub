@@ -43,7 +43,7 @@ import RoleManagementPage from './components/RoleManagementPage';
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
 
-const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT', 'ROLE_TECHNICIAN'];
+const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
 import bgImage from '../Gemini_Generated_Image_xom0dcxom0dcxom0 (2).png';
