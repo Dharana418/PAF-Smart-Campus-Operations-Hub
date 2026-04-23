@@ -46,8 +46,7 @@ const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhos
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
-import bgImage from '../Gemini_Generated_Image_xom0dcxom0dcxom0 (2).png';
-import dashboardBg from './assets/dashboard-bg.png';
+import premiumBg from './assets/premium_security_background_1776952085682.png';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -351,7 +350,7 @@ function App() {
     <div
       className="min-h-screen text-gray-100 flex overflow-hidden relative"
       style={{
-        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${bgImage}")`,
+        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${premiumBg}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
