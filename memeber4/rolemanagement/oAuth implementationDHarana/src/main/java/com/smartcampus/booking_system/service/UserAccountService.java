@@ -79,4 +79,34 @@ public class UserAccountService {
         user.setRole(role);
         return toProfile(userAccountRepository.save(user));
     }
+
+    public UserProfileDto createUser(String fullName, String email, RoleType role, String birthday, String assignedDate) {
+        String normalizedEmail = email.toLowerCase(java.util.Locale.ROOT);
+        if (userAccountRepository.findByEmail(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("User already exists: " + email);
+        }
+        UserAccount user = new UserAccount();
+        user.setFullName(fullName);
+        user.setEmail(normalizedEmail);
+        user.setRole(role != null ? role : RoleType.ROLE_STUDENT);
+        user.setProvider("manual");
+        user.setProviderId(normalizedEmail);
+        if (birthday != null && !birthday.isBlank()) user.setBirthday(java.time.LocalDate.parse(birthday));
+        if (assignedDate != null && !assignedDate.isBlank()) user.setAssignedDate(java.time.LocalDate.parse(assignedDate));
+        return toProfile(userAccountRepository.save(user));
+    }
+
+    public void deleteUser(String email) {
+        UserAccount user = getRequiredByEmail(email);
+        userAccountRepository.delete(user);
+    }
+
+    public UserProfileDto updateProfile(String email, String fullName, String newEmail, String birthday, String assignedDate) {
+        UserAccount user = getRequiredByEmail(email);
+        if (fullName != null) user.setFullName(fullName);
+        if (newEmail != null) user.setEmail(newEmail.toLowerCase(java.util.Locale.ROOT));
+        if (birthday != null) user.setBirthday(birthday != null && !birthday.isBlank() ? java.time.LocalDate.parse(birthday) : null);
+        if (assignedDate != null) user.setAssignedDate(assignedDate != null && !assignedDate.isBlank() ? java.time.LocalDate.parse(assignedDate) : null);
+        return toProfile(userAccountRepository.save(user));
+    }
 }
