@@ -215,7 +215,7 @@ function App() {
         </div>
         <div className="flex flex-col items-center gap-4 z-10">
           <div className="w-16 h-16 border-4 border-white/10 border-t-accent-1 rounded-full animate-spin"></div>
-          <p className="text-gray-300 animate-pulse text-lg font-heading tracking-wide">Initializing Hub...</p>
+          <p className="text-gray-900 animate-pulse text-lg font-black tracking-wide">Initializing Hub...</p>
         </div>
       </div>
     );
@@ -265,7 +265,7 @@ function App() {
 
           {!isLoginViewAdmin ? (
             <div className="space-y-6 animate-fade-in">
-              <p className="text-gray-500 font-medium text-sm leading-relaxed max-w-[300px] mx-auto">
+              <p className="text-gray-800 font-black text-sm leading-relaxed max-w-[300px] mx-auto">
                 Authorized personnel only. Please verify your identity using institutional Google Auth.
               </p>
               <a className="btn btn-google w-full flex items-center justify-center gap-4 group" href={OAUTH_ENTRY_URL}>
@@ -343,7 +343,7 @@ function App() {
             </div>
           ) : null}
           
-          <p className="mt-10 text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] opacity-50">
+          <p className="mt-10 text-[10px] text-gray-900 font-black uppercase tracking-[0.2em] opacity-80">
             System Node: Localhost-8080 // Build v0.0.1-Stable
           </p>
         </div>
@@ -383,8 +383,8 @@ function App() {
             <LayoutDashboard className="text-white w-5 h-5" />
           </div>
           <div>
-            <h1 className="font-heading font-black text-xl leading-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase tracking-tighter">Operations Hub</h1>
-            <p className="text-[10px] text-accent-1 uppercase tracking-[0.2em] font-black">Smart Campus</p>
+            <h1 className="font-heading font-black text-xl leading-tight text-white uppercase tracking-tighter">Operations Hub</h1>
+            <p className="text-[10px] text-accent-1 uppercase tracking-[0.3em] font-black">Smart Campus</p>
           </div>
         </div>
 
@@ -427,7 +427,7 @@ function App() {
               <p className="text-sm font-bold text-white truncate">{user?.fullName}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${canManageRoles ? 'bg-green-400' : 'bg-blue-400'}`}></span>
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">
+                <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">
                   {canManageRoles ? 'System Admin' : 'Staff Member'}
                 </p>
               </div>
@@ -480,7 +480,7 @@ function App() {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-1/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Unread Alerts</p>
+                  <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Unread Alerts</p>
                   <h3 className="text-5xl font-heading font-black text-gray-900">{unreadCount}</h3>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-accent-1 text-white flex items-center justify-center shadow-lg">
@@ -493,7 +493,7 @@ function App() {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-2/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div>
                 <h2 className="text-3xl font-heading font-black text-gray-900 mb-1 uppercase tracking-tighter">Command Center</h2>
-                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Welcome back, {user.fullName}</p>
+                <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Welcome back, {user.fullName}</p>
               </div>
               <div className="hidden sm:block">
                 <div className="px-6 py-3 rounded-full bg-accent-2 text-white text-xs font-black tracking-[0.2em] uppercase shadow-lg">
@@ -530,8 +530,8 @@ function App() {
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-gray-500">
                       <CheckCircle className="w-8 h-8" />
                     </div>
-                    <h4 className="text-lg font-medium text-white mb-1">All caught up</h4>
-                    <p className="text-gray-400 text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
+                    <h4 className="text-lg font-black text-white mb-1">All caught up</h4>
+                    <p className="text-gray-300 font-black text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
                   </div>
                 )}
 
@@ -547,9 +547,9 @@ function App() {
                       <div className="flex-1 min-w-0 pr-6">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
                           <h4 className={`text-lg truncate font-black tracking-tight ${item.isRead ? 'text-gray-500' : 'text-gray-900'}`}>{item.title}</h4>
-                          <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.2em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.3em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-400' : 'text-gray-800'}`}>{item.message}</p>
+                        <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-600' : 'text-gray-900'}`}>{item.message}</p>
 
                         <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <button
@@ -578,7 +578,7 @@ function App() {
                   </h3>
                   <form className="space-y-4" onSubmit={submitNotification}>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Recipient Email</label>
+                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
                       <input
                         type="email"
                         placeholder="user@smartcampus.com"
@@ -589,7 +589,7 @@ function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Title</label>
+                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Title</label>
                       <input
                         placeholder="Subject of notification"
                         value={notificationForm.title}
@@ -637,7 +637,7 @@ function App() {
                       <TrendingUp className="w-6 h-6 text-accent-1" />
                       Campus Activity
                     </h3>
-                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Real-time system interaction metrics</p>
+                    <p className="text-[10px] text-gray-900 font-black uppercase tracking-[0.3em]">Real-time system interaction metrics</p>
                   </div>
 
                   <div className="h-[200px] w-full">
@@ -721,7 +721,7 @@ function App() {
                       {['Admin', 'Staff', 'Students'].map((label, i) => (
                         <div key={label} className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</span>
+                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">{label}</span>
                         </div>
                       ))}
                     </div>

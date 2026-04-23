@@ -8,28 +8,28 @@ const roleConfig = {
     label: 'Admin',
     icon: Star,
     bg: 'bg-purple-500/10',
-    text: 'text-purple-400',
-    border: 'border-purple-500/20',
-    dot: 'bg-purple-500',
-    gradient: 'from-purple-500 to-purple-700',
+    text: 'text-purple-600',
+    border: 'border-purple-600/20',
+    dot: 'bg-purple-600',
+    gradient: 'from-purple-600 to-purple-800',
   },
   ROLE_STAFF: {
     label: 'Staff',
     icon: Shield,
     bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/20',
-    dot: 'bg-blue-500',
-    gradient: 'from-blue-500 to-blue-700',
+    text: 'text-blue-600',
+    border: 'border-blue-600/20',
+    dot: 'bg-blue-600',
+    gradient: 'from-blue-600 to-blue-800',
   },
   ROLE_STUDENT: {
     label: 'Student',
     icon: GraduationCap,
     bg: 'bg-green-500/10',
-    text: 'text-green-400',
-    border: 'border-green-500/20',
-    dot: 'bg-green-500',
-    gradient: 'from-green-500 to-green-700',
+    text: 'text-green-600',
+    border: 'border-green-600/20',
+    dot: 'bg-green-600',
+    gradient: 'from-green-600 to-green-800',
   },
 };
 
@@ -37,7 +37,7 @@ function RoleBadge({ role }) {
   const cfg = roleConfig[role] || roleConfig.ROLE_STUDENT;
   const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
       <Icon className="w-3 h-3" />
       {cfg.label}
     </span>
@@ -48,7 +48,7 @@ function Avatar({ name, role }) {
   const cfg = roleConfig[role] || roleConfig.ROLE_STUDENT;
   const initials = name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '?';
   return (
-    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${cfg.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0`}>
+    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${cfg.gradient} flex items-center justify-center text-white font-black text-sm shadow-md flex-shrink-0`}>
       {initials}
     </div>
   );
@@ -63,7 +63,7 @@ function RoleDropdown({ value, onChange, disabled }) {
       <button
         onClick={() => setOpen(!open)}
         disabled={disabled}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${cfg.bg} ${cfg.text} ${cfg.border} hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-black transition-all ${cfg.bg} ${cfg.text} ${cfg.border} hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span>{cfg.label}</span>
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -77,7 +77,7 @@ function RoleDropdown({ value, onChange, disabled }) {
               <button
                 key={role}
                 onClick={() => { onChange(role); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-5 py-3 text-left text-xs font-bold hover:bg-white/5 transition-all ${role === value ? c.text : 'text-gray-400'}`}
+                className={`w-full flex items-center gap-3 px-5 py-3 text-left text-xs font-black hover:bg-white/5 transition-all ${role === value ? c.text : 'text-gray-900'}`}
               >
                 <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${role === value ? c.bg : 'bg-white/5'}`}>
                   <Icon className={`w-3.5 h-3.5 ${role === value ? c.text : 'text-gray-500'}`} />
@@ -254,13 +254,13 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
           </div>
           <div>
             <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Authoritative Registration</h2>
-            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Manually authorize and provision new campus identity entries</p>
+            <p className="text-[10px] text-gray-900 font-black uppercase tracking-[0.3em] opacity-80">Manually authorize and provision new campus identity entries</p>
           </div>
         </div>
 
         <form onSubmit={handleConfirmRegister} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Full Identity Name</label>
+            <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">Full Identity Name</label>
             <input
               placeholder="e.g. Johnathan Doe"
               value={registerForm.fullName}
@@ -349,7 +349,7 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
           <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
             Campus Registry
           </h2>
-          <p className="text-sm text-gray-400 font-black mt-1 uppercase tracking-widest text-[10px] opacity-80">System-wide user role synchronization and permissions</p>
+          <p className="text-sm text-gray-800 font-black mt-1 uppercase tracking-[0.3em] text-[10px]">System-wide user role synchronization and permissions</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
