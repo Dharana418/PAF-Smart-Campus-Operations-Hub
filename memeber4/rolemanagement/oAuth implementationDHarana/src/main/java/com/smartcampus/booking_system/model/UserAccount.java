@@ -18,6 +18,7 @@ public class UserAccount {
     private String provider;
     private String providerId;
     private RoleType role;
+    private String password;
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -73,6 +74,14 @@ public class UserAccount {
 
     public void setRole(RoleType role) {
         this.role = role;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public LocalDateTime getCreatedAt() {
