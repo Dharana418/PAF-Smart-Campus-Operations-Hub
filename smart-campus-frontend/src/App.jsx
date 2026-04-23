@@ -39,6 +39,7 @@ import {
   Area
 } from 'recharts';
 import RoleManagementPage from './components/RoleManagementPage';
+import SentNotificationsPage from './components/SentNotificationsPage';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
@@ -414,13 +415,26 @@ function App() {
                 activePage === 'roles'
                   ? 'bg-accent-2 text-white shadow-[0_8px_20px_rgba(139,92,246,0.4)]'
                   : 'hover:bg-white/5 text-gray-400 hover:text-white'
-              }`}
-            >
+            }`}
+          >
               <ShieldAlert className="w-5 h-5" />
               Role Management
               {users.length > 0 && (
                 <span className="ml-auto bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{users.length}</span>
               )}
+            </button>
+          )}
+          {canCreateNotifications && (
+            <button
+              onClick={() => setActivePage('sent')}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
+                activePage === 'sent'
+                  ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.4)]'
+                  : 'hover:bg-white/5 text-gray-400 hover:text-white'
+              }`}
+            >
+              <Send className="w-5 h-5" />
+              Sent Alerts
             </button>
           )}
         </nav>
@@ -465,7 +479,9 @@ function App() {
 
         <div className="p-6 md:p-10 max-w-[1200px] w-full mx-auto space-y-8">
 
-          {activePage === 'roles' && canManageRoles ? (
+          {activePage === 'sent' ? (
+            <SentNotificationsPage />
+          ) : activePage === 'roles' && canManageRoles ? (
             <RoleManagementPage
               users={users}
               onUpdateRole={updateUserRole}
