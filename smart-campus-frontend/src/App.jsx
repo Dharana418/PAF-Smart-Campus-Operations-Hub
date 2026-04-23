@@ -6,7 +6,6 @@ import {
   Bell, 
   Search, 
   RefreshCw, 
-  PieChart as PieChartIcon, 
   Layout, 
   Activity, 
   TrendingUp,
@@ -21,8 +20,9 @@ import {
   LogOut, 
   LayoutDashboard, 
   ShieldAlert, 
-  BarChart3, 
-  PieChart as PieIcon 
+  BarChart3,
+  PieChart as PieChartIcon,
+  Send
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -108,12 +108,17 @@ function App() {
 
   const initializeApp = async () => {
     try {
+      console.log('Starting app initialization...');
       setLoading(true);
       const meResponse = await apiClient.get('/me');
+      console.log('Me response received:', meResponse.data);
       setUser(meResponse.data);
+      console.log('Loading secondary data...');
       await Promise.all([loadNotifications(), loadUsersIfAdmin(meResponse.data.role)]);
+      console.log('Data loaded successfully.');
       setError('');
     } catch (err) {
+      console.error('Initialization failed:', err);
       localStorage.removeItem('campus_access_token');
       setUser(null);
       setNotifications([]);
@@ -123,6 +128,7 @@ function App() {
         setError('Unable to load dashboard data.');
       }
     } finally {
+      console.log('Initialization complete, stopping loader.');
       setLoading(false);
     }
   };
@@ -223,7 +229,7 @@ function App() {
         </div>
         <div className="flex flex-col items-center gap-4 z-10">
           <div className="w-16 h-16 border-4 border-white/10 border-t-accent-1 rounded-full animate-spin"></div>
-          <p className="text-gray-900 animate-pulse text-lg font-black tracking-wide">Initializing Hub...</p>
+          <p className="text-white animate-pulse text-lg font-black tracking-wide">Initializing Hub...</p>
         </div>
       </div>
     );
@@ -411,7 +417,7 @@ function App() {
           {canManageRoles && (
             <button
               onClick={() => setActivePage('roles')}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
                 activePage === 'roles'
                   ? 'bg-accent-2 text-white shadow-[0_8px_20px_rgba(139,92,246,0.4)]'
                   : 'hover:bg-white/5 text-gray-400 hover:text-white'
