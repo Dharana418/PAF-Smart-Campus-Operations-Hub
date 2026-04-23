@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from './api/client';
-import { Bell, Users, PlusCircle, CheckCircle, Info, AlertTriangle, XOctagon, LogOut, LayoutDashboard, ShieldAlert, Key } from 'lucide-react';
+import { Bell, Users, PlusCircle, CheckCircle, Info, AlertTriangle, XOctagon, LogOut, LayoutDashboard, ShieldAlert, BarChart3, PieChart, Activity, TrendingUp } from 'lucide-react';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
