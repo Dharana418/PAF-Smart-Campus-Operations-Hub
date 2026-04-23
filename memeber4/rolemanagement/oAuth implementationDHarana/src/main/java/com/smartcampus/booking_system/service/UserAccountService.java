@@ -67,7 +67,7 @@ public class UserAccountService {
     }
 
     public UserProfileDto toProfile(UserAccount user) {
-        return new UserProfileDto(user.getId(), user.getFullName(), user.getEmail(), user.getRole());
+        return new UserProfileDto(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getBirthday(), user.getAssignedDate());
     }
 
     public java.util.List<UserProfileDto> getAllProfiles() {

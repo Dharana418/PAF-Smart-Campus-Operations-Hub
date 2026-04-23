@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import com.smartcampus.booking_system.model.UserAccount;
+
 public interface NotificationRepository extends MongoRepository<Notification, String> {
-    List<Notification> findByRecipientEmailOrderByCreatedAtDesc(String recipientEmail);
+    List<Notification> findByRecipientOrderByCreatedAtDesc(UserAccount recipient);
 
-    Optional<Notification> findByIdAndRecipientEmail(String id, String recipientEmail);
+    Optional<Notification> findByIdAndRecipient(String id, UserAccount recipient);
 
-    long countByRecipientEmailAndIsReadFalse(String recipientEmail);
+    long countByRecipientAndIsReadFalse(UserAccount recipient);
 }

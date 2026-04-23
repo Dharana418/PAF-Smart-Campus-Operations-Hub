@@ -35,18 +35,20 @@ public class NotificationService {
     }
 
     public NotificationListResponse getForUser(String email) {
+        UserAccount recipient = userAccountService.getRequiredByEmail(email);
         java.util.List<NotificationDto> notifications = notificationRepository
-                .findByRecipientEmailOrderByCreatedAtDesc(email)
+                .findByRecipientOrderByCreatedAtDesc(recipient)
                 .stream()
                 .map(this::toDto)
                 .toList();
 
-        long unreadCount = notificationRepository.countByRecipientEmailAndIsReadFalse(email);
+        long unreadCount = notificationRepository.countByRecipientAndIsReadFalse(recipient);
         return new NotificationListResponse(notifications, unreadCount);
     }
 
     public NotificationDto markRead(String email, String notificationId, boolean read) {
-        Notification notification = notificationRepository.findByIdAndRecipientEmail(notificationId, email)
+        UserAccount recipient = userAccountService.getRequiredByEmail(email);
+        Notification notification = notificationRepository.findByIdAndRecipient(notificationId, recipient)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
         notification.setRead(read);
