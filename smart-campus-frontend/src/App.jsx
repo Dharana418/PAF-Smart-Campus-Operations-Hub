@@ -1,6 +1,43 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from './api/client';
-import { Bell, Users, PlusCircle, CheckCircle, Info, AlertTriangle, XOctagon, LogOut, LayoutDashboard, ShieldAlert, BarChart3, PieChart, Activity, TrendingUp } from 'lucide-react';
+import { 
+  Users, 
+  Shield, 
+  Bell, 
+  Search, 
+  RefreshCw, 
+  PieChart as PieChartIcon, 
+  Layout, 
+  Activity, 
+  TrendingUp,
+  Mail,
+  Lock,
+  ArrowRight,
+  PlusCircle, 
+  CheckCircle, 
+  Info, 
+  AlertTriangle, 
+  XOctagon, 
+  LogOut, 
+  LayoutDashboard, 
+  ShieldAlert, 
+  BarChart3, 
+  PieChart as PieIcon 
+} from 'lucide-react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as ReTooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell,
+  AreaChart,
+  Area
+} from 'recharts';
 import RoleManagementPage from './components/RoleManagementPage';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
@@ -579,60 +616,105 @@ function App() {
               )}
 
               {canManageRoles && (
-                <section className="bg-white/95 backdrop-blur-2xl p-7 rounded-[32px] border border-white shadow-2xl">
-                  <h3 className="text-xl font-heading font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
-                    <PieChart className="w-6 h-6 text-accent-2" />
-                    System Access
-                  </h3>
-                  <div className="space-y-4">
-                    {users.map((profile) => (
-                      <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-lg transition-all" key={profile.email}>
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="min-w-0 pr-2">
-                            <p className="text-sm font-black text-gray-900 truncate uppercase tracking-tight">{profile.fullName}</p>
-                            <div className="mt-2">
-                              <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Identity Email</label>
-                              <input
-                                id={`email-input-${profile.email}`}
-                                type="email"
-                                defaultValue={profile.email}
-                                className="!py-1.5 !px-3 !text-[10px] !bg-white !border-gray-200 !text-gray-900 font-black mb-1 w-full rounded-lg"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest">Access Role</label>
-                            <select
-                              id={`role-select-${profile.email}`}
-                              defaultValue={profile.role}
-                              className="w-full py-2.5 px-4 text-[10px] font-black uppercase tracking-[0.2em] bg-white border-gray-200 text-gray-900 rounded-xl"
-                            >
-                              {roleOptions.map(role => (
-                                <option key={role} value={role}>{role.replace('ROLE_', '')}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <button
-                            onClick={() => {
-                              const newRole = document.getElementById(`role-select-${profile.email}`).value;
-                              const newEmail = document.getElementById(`email-input-${profile.email}`).value;
-                              if (newRole !== profile.role) updateUserRole(profile.email, newRole);
-                              if (newEmail !== profile.email) updateProfile(profile.email, { email: newEmail });
-                            }}
-                            className="w-full py-3 bg-accent-1 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-accent-1/20 hover:bg-accent-1/90 transition-all"
+                <>
+                  {/* Advanced Analytics Section */}
+                  <section className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl space-y-8">
+                  <div>
+                    <h3 className="text-xl font-black mb-1 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
+                      <TrendingUp className="w-6 h-6 text-accent-1" />
+                      Campus Activity
+                    </h3>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Real-time system interaction metrics</p>
+                  </div>
+
+                  <div className="h-[200px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={[
+                        { name: 'Mon', value: 400 },
+                        { name: 'Tue', value: 300 },
+                        { name: 'Wed', value: 600 },
+                        { name: 'Thu', value: 800 },
+                        { name: 'Fri', value: 500 },
+                        { name: 'Sat', value: 900 },
+                        { name: 'Sun', value: 1100 },
+                      ]}>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} 
+                        />
+                        <YAxis hide />
+                        <ReTooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#fff', 
+                            borderRadius: '16px', 
+                            border: 'none', 
+                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                            fontSize: '12px',
+                            fontWeight: '900'
+                          }} 
+                        />
+                        <Area type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Peak Time</p>
+                      <p className="text-2xl font-black text-gray-900">14:00</p>
+                    </div>
+                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Syncs</p>
+                      <p className="text-2xl font-black text-gray-900">2.4k</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
+                      <PieChartIcon className="w-6 h-6 text-accent-2" />
+                      Role Distribution
+                    </h3>
+                    <div className="h-[180px] flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Admin', value: users.filter(u => u.role === 'ROLE_ADMIN').length },
+                              { name: 'Staff', value: users.filter(u => u.role === 'ROLE_STAFF').length },
+                              { name: 'Students', value: users.filter(u => u.role === 'ROLE_STUDENT').length },
+                            ]}
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={8}
+                            dataKey="value"
                           >
-                            Sync Access Entry
-                          </button>
+                            <Cell fill="#3B82F6" />
+                            <Cell fill="#10B981" />
+                            <Cell fill="#F59E0B" />
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-center gap-4 mt-4">
+                      {['Admin', 'Staff', 'Students'].map((label, i) => (
+                        <div key={label} className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</span>
                         </div>
-                      </div>
-                    ))}
-                    {users.length === 0 && !error && (
-                      <p className="text-xs text-gray-400 font-black uppercase tracking-widest text-center py-8">No active entries</p>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </section>
+                </>
               )}
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save } from 'lucide-react';
+import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle } from 'lucide-react';
 
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT', 'ROLE_TECHNICIAN'];
 
@@ -213,23 +213,88 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
 
   return (
     <div className="animate-fade-in space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Authoritative Registration Panel */}
+      <div className="bg-white/95 backdrop-blur-2xl rounded-[40px] border border-white shadow-2xl p-10 mb-10">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 bg-accent-1 rounded-2xl shadow-lg shadow-accent-1/20">
+            <Shield className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Authoritative Registration</h2>
+            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Manually authorize and provision new campus identity entries</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleConfirmRegister} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Full Identity Name</label>
+            <input
+              placeholder="e.g. Johnathan Doe"
+              value={registerForm.fullName}
+              onChange={e => setRegisterForm({ ...registerForm, fullName: e.target.value })}
+              required
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Institutional Email</label>
+            <input
+              type="email"
+              placeholder="user@smartcampus.com"
+              value={registerForm.email}
+              onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
+              required
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Access Level</label>
+            <select
+              value={registerForm.role}
+              onChange={e => setRegisterForm({ ...registerForm, role: e.target.value })}
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            >
+              {roleOptions.map(r => <option key={r} value={r}>{r.replace('ROLE_', '')}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Birth Date</label>
+            <input
+              type="date"
+              value={registerForm.birthday}
+              onChange={e => setRegisterForm({ ...registerForm, birthday: e.target.value })}
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Registry Date</label>
+            <input
+              type="date"
+              value={registerForm.assignedDate}
+              onChange={e => setRegisterForm({ ...registerForm, assignedDate: e.target.value })}
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            />
+          </div>
+          <div className="flex items-end">
+            <button 
+              type="submit" 
+              className="w-full h-14 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-gray-900/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-3"
+            >
+              <PlusCircle className="w-5 h-5" />
+              Authorize New Entry
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
         <div>
-          <h2 className="text-3xl font-heading font-black text-white flex items-center gap-3 uppercase tracking-tighter">
-            <Users className="w-8 h-8 text-accent-2" />
-            Registry Management
+          <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+            Campus Registry
           </h2>
           <p className="text-sm text-gray-400 font-black mt-1 uppercase tracking-widest text-[10px] opacity-80">System-wide user role synchronization and permissions</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setShowRegister(true)}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent-1 text-white text-sm font-black uppercase tracking-widest hover:bg-accent-1/90 transition-all shadow-xl shadow-accent-1/20"
-          >
-            <Shield className="w-4 h-4" />
-            Manually Register
-          </button>
           <button
             onClick={onRefresh}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg"
@@ -465,69 +530,6 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
               <button onClick={handleConfirmDelete} className="flex-1 px-6 py-3.5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-red-600/30 hover:-translate-y-0.5 transition-all">Confirm Delete</button>
             </div>
           </div>
-        </Modal>
-      )}
-
-      {/* Manual Registration Modal */}
-      {showRegister && (
-        <Modal title="Manually Register User" onClose={() => setShowRegister(false)}>
-          <form onSubmit={handleConfirmRegister} className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Full Identity Name</label>
-              <input
-                placeholder="John Doe"
-                value={registerForm.fullName}
-                onChange={e => setRegisterForm({ ...registerForm, fullName: e.target.value })}
-                required
-                className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Institutional Email</label>
-              <input
-                type="email"
-                placeholder="user@smartcampus.com"
-                value={registerForm.email}
-                onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
-                required
-                className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Access Role</label>
-              <select
-                value={registerForm.role}
-                onChange={e => setRegisterForm({ ...registerForm, role: e.target.value })}
-                className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-              >
-                {roleOptions.map(r => <option key={r} value={r}>{r.replace('ROLE_', '')}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Birth Date</label>
-                <input
-                  type="date"
-                  value={registerForm.birthday}
-                  onChange={e => setRegisterForm({ ...registerForm, birthday: e.target.value })}
-                  className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Registry Date</label>
-                <input
-                  type="date"
-                  value={registerForm.assignedDate}
-                  onChange={e => setRegisterForm({ ...registerForm, assignedDate: e.target.value })}
-                  className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-                />
-              </div>
-            </div>
-            <div className="pt-6 flex gap-3">
-              <button type="button" onClick={() => setShowRegister(false)} className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all">Cancel</button>
-              <button type="submit" className="flex-1 px-6 py-3.5 bg-accent-1 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-accent-1/30 hover:-translate-y-0.5 transition-all">Register User</button>
-            </div>
-          </form>
         </Modal>
       )}
     </div>
