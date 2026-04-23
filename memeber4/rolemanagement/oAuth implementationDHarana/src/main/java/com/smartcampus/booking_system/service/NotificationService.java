@@ -20,7 +20,9 @@ public class NotificationService {
         this.userAccountService = userAccountService;
     }
 
-    public NotificationDto createNotification(CreateNotificationRequest request) {
+    public NotificationDto createNotification(String senderEmail, CreateNotificationRequest request) {
+        UserAccount sender = userAccountService.getRequiredByEmail(senderEmail);
+
         if (request.isBroadcast()) {
             java.util.List<UserAccount> allUsers = userAccountService.getAllUsersRaw();
             for (UserAccount user : allUsers) {
@@ -31,9 +33,9 @@ public class NotificationService {
                 notification.setRead(false);
                 notification.setBroadcast(true);
                 notification.setRecipient(user);
+                notification.setSender(sender);
                 notificationRepository.save(notification);
             }
-            // Return a dummy DTO for the response (since we created many)
             return new NotificationDto("broadcast", request.title(), request.message(), request.type(), false, java.time.LocalDateTime.now());
         }
 
@@ -46,6 +48,7 @@ public class NotificationService {
         notification.setRead(false);
         notification.setBroadcast(false);
         notification.setRecipient(recipient);
+        notification.setSender(sender);
 
         Notification saved = notificationRepository.save(notification);
         return toDto(saved);
@@ -61,6 +64,42 @@ public class NotificationService {
 
         long unreadCount = notificationRepository.countByRecipientAndIsReadFalse(recipient);
         return new NotificationListResponse(notifications, unreadCount);
+    }
+
+    public java.util.List<NotificationDto> getSentBy(String email) {
+        UserAccount sender = userAccountService.getRequiredByEmail(email);
+        return notificationRepository.findBySenderOrderByCreatedAtDesc(sender)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public void deleteNotification(String senderEmail, String id) {
+        UserAccount sender = userAccountService.getRequiredByEmail(senderEmail);
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+        
+        if (!notification.getSender().getEmail().equals(sender.getEmail())) {
+            throw new IllegalStateException("Unauthorized to delete this notification");
+        }
+        
+        notificationRepository.delete(notification);
+    }
+
+    public NotificationDto updateNotification(String senderEmail, String id, CreateNotificationRequest request) {
+        UserAccount sender = userAccountService.getRequiredByEmail(senderEmail);
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+
+        if (!notification.getSender().getEmail().equals(sender.getEmail())) {
+            throw new IllegalStateException("Unauthorized to update this notification");
+        }
+
+        notification.setTitle(request.title());
+        notification.setMessage(request.message());
+        notification.setType(request.type());
+        
+        return toDto(notificationRepository.save(notification));
     }
 
     public NotificationDto markRead(String email, String notificationId, boolean read) {
