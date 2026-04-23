@@ -21,9 +21,20 @@ public class Notification {
     @DBRef
     private UserAccount recipient;
 
+    @DBRef
+    private UserAccount sender;
+
     public Notification() {
         this.createdAt = LocalDateTime.now();
         this.isBroadcast = false;
+    }
+
+    public UserAccount getSender() {
+        return sender;
+    }
+
+    public void setSender(UserAccount sender) {
+        this.sender = sender;
     }
 
     public boolean isBroadcast() {

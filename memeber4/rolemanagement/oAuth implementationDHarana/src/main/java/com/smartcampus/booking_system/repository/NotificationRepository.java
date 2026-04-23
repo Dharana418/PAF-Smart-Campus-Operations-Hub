@@ -10,6 +10,8 @@ import com.smartcampus.booking_system.model.UserAccount;
 public interface NotificationRepository extends MongoRepository<Notification, String> {
     List<Notification> findByRecipientOrderByCreatedAtDesc(UserAccount recipient);
 
+    List<Notification> findBySenderOrderByCreatedAtDesc(UserAccount sender);
+
     Optional<Notification> findByIdAndRecipient(String id, UserAccount recipient);
 
     long countByRecipientAndIsReadFalse(UserAccount recipient);
