@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply font-body text-gray-100 bg-bg-deep min-h-screen relative overflow-x-hidden m-0;
+    @apply font-body text-gray-800 bg-bg-deep min-h-screen relative overflow-x-hidden m-0;
   }
 
   body::before {
@@ -26,27 +26,25 @@
   }
 
   input, textarea, select {
-    @apply w-full rounded-xl border border-panel-border px-4 py-3 font-body text-[0.95rem] text-white bg-black/20 transition-all duration-200;
+    @apply w-full rounded-xl border border-gray-200 px-4 py-3 font-body text-[0.95rem] text-gray-800 bg-white/50 backdrop-blur-sm transition-all duration-200;
   }
 
   input:focus, textarea:focus, select:focus {
-    @apply outline-none border-blue-500 bg-black/40;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    @apply outline-none border-blue-400 bg-white shadow-[0_0_0_3px_rgba(59,130,246,0.1)];
   }
 
   select option {
-    @apply bg-gray-900 text-white;
+    @apply bg-white text-gray-800;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-panel-light backdrop-blur-[20px] border border-panel-border rounded-[20px] p-7 shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300;
+    @apply bg-panel-light backdrop-blur-[20px] border border-panel-border rounded-[20px] p-7 shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300;
   }
   
   .glass-card:hover {
-    @apply -translate-y-0.5 border-white/10;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.15);
+    @apply -translate-y-0.5 border-blue-500/20 shadow-[0_12px_40px_rgba(0,0,0,0.08),0_0_40px_rgba(59,130,246,0.05)];
   }
 
   .btn {
