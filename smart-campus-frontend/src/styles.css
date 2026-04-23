@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply font-body text-gray-800 bg-bg-deep min-h-screen relative overflow-x-hidden m-0;
+    @apply font-body text-gray-100 bg-bg-deep min-h-screen relative overflow-x-hidden m-0;
   }
 
   body::before {
@@ -26,7 +26,7 @@
   }
 
   input, textarea, select {
-    @apply w-full rounded-xl border border-gray-200 px-4 py-3 font-body text-[0.95rem] text-gray-800 bg-white/50 backdrop-blur-sm transition-all duration-200;
+    @apply w-full rounded-xl border border-white/10 px-4 py-3 font-body text-[0.95rem] text-gray-100 bg-black/40 backdrop-blur-sm transition-all duration-200;
   }
 
   input:focus, textarea:focus, select:focus {
@@ -34,7 +34,7 @@
   }
 
   select option {
-    @apply bg-white text-gray-800;
+    @apply bg-gray-900 text-gray-100;
   }
 }
 
