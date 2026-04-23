@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body text-gray-100 bg-bg-deep min-h-screen relative overflow-x-hidden m-0;
+  }
+
+  body::before {
+    content: '';
+    @apply fixed top-[-20%] left-[-10%] w-[50%] h-[50%] -z-10;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+  }
+
+  body::after {
+    content: '';
+    @apply fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] -z-10;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-heading font-semibold tracking-tight m-0;
+  }
+
+  input, textarea, select {
+    @apply w-full rounded-xl border border-panel-border px-4 py-3 font-body text-[0.95rem] text-white bg-black/20 transition-all duration-200;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply outline-none border-blue-500 bg-black/40;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  select option {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-panel-light backdrop-blur-[20px] border border-panel-border rounded-[20px] p-7 shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply -translate-y-0.5 border-white/10;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.15);
+  }
+
+  .btn {
+    @apply rounded-xl px-5 py-3 font-semibold text-[0.95rem] cursor-pointer inline-flex justify-center items-center transition-all duration-300 tracking-[0.02em] font-heading border-none;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-br from-accent-1 to-accent-2 text-white shadow-[0_4px_15px_rgba(59,130,246,0.3)];
+  }
+
+  .btn-primary:hover {
+    @apply -translate-y-0.5 shadow-[0_6px_20px_rgba(59,130,246,0.4)];
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 border border-white/10 text-gray-100;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-white/10 border-white/20;
+  }
+}
