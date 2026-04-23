@@ -46,8 +46,7 @@ const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhos
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
-import bgImage from '../Gemini_Generated_Image_xom0dcxom0dcxom0 (2).png';
-import dashboardBg from './assets/dashboard-bg.png';
+import premiumBg from './assets/premium_security_background_1776952085682.png';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -216,7 +215,7 @@ function App() {
         </div>
         <div className="flex flex-col items-center gap-4 z-10">
           <div className="w-16 h-16 border-4 border-white/10 border-t-accent-1 rounded-full animate-spin"></div>
-          <p className="text-gray-300 animate-pulse text-lg font-heading tracking-wide">Initializing Hub...</p>
+          <p className="text-gray-900 animate-pulse text-lg font-black tracking-wide">Initializing Hub...</p>
         </div>
       </div>
     );
@@ -225,114 +224,128 @@ function App() {
   if (!user) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center p-6 relative"
+        className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.7), rgba(10, 10, 10, 0.8)), url("${bgImage}")`,
+          backgroundImage: `radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%), url("${premiumBg}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
-        <div className="bg-white/95 backdrop-blur-3xl w-full max-w-[480px] text-center px-9 py-12 relative overflow-hidden rounded-[40px] shadow-2xl border border-white/20">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-1 to-transparent"></div>
-          <p className="inline-block mb-3 uppercase tracking-[0.3em] text-xs text-accent-1 font-black">Smart Campus Operations Hub</p>
-          <h1 className="text-5xl mb-6 font-black text-gray-900 uppercase tracking-tighter">Secure Access Portal</h1>
+        {/* Decorative elements */}
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-1/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-2/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
 
-          <div className="flex gap-2 p-1.5 bg-gray-100 rounded-2xl mb-8 mt-6 w-full border border-gray-200">
+        <div className="glass-card w-full max-w-[500px] text-center relative z-10 animate-fade-in">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-accent-1 to-transparent rounded-t-full opacity-50" />
+          
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-16 h-16 rounded-3xl bg-gray-900 flex items-center justify-center mb-6 shadow-2xl animate-float">
+              <Shield className="text-white w-8 h-8" />
+            </div>
+            <span className="badge-premium">Operational Security Intelligence</span>
+            <h1 className="text-5xl font-heading font-black text-gray-900 tracking-tighter leading-tight uppercase">
+              Campus <br/><span className="text-accent-1">Operations</span> Hub
+            </h1>
+          </div>
+
+          <div className="flex gap-2 p-2 bg-gray-100/50 rounded-3xl mb-10 border border-gray-200">
             <button
               onClick={() => { setIsLoginViewAdmin(false); setError(''); }}
-              className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!isLoginViewAdmin ? 'bg-white text-gray-900 shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${!isLoginViewAdmin ? 'bg-white text-gray-900 shadow-xl' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              Standard Staff
+              Standard
             </button>
             <button
               onClick={() => { setIsLoginViewAdmin(true); setError(''); }}
-              className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${isLoginViewAdmin ? 'bg-white text-gray-900 shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isLoginViewAdmin ? 'bg-white text-gray-900 shadow-xl' : 'text-gray-400 hover:text-gray-600'}`}
             >
               Admin Gateway
             </button>
           </div>
 
           {!isLoginViewAdmin ? (
-            <div className="animate-fade-in">
-              <p className="text-gray-600 font-medium">Use your institutional Google account to continue.</p>
-              <a className="w-full mt-6 bg-white text-gray-900 py-3.5 px-5 text-base shadow-[0_4px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] hover:bg-gray-50 flex items-center justify-center gap-3 rounded-xl font-bold transition-all border border-gray-100" href={OAUTH_ENTRY_URL}>
-                <svg style={{ width: '22px', height: '22px' }} viewBox="0 0 24 24">
+            <div className="space-y-6 animate-fade-in">
+              <p className="text-gray-800 font-black text-sm leading-relaxed max-w-[300px] mx-auto">
+                Authorized personnel only. Please verify your identity using institutional Google Auth.
+              </p>
+              <a className="btn btn-google w-full flex items-center justify-center gap-4 group" href={OAUTH_ENTRY_URL}>
+                <svg className="w-6 h-6 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continue with Google
+                Sign in with Google
               </a>
             </div>
           ) : (
-            <div className="animate-fade-in flex flex-col gap-4 mt-2">
-              <form onSubmit={handleAdminLogin} className="text-left flex flex-col gap-4">
-                <label className="text-gray-900 font-black text-xs uppercase tracking-widest mb-1">
-                  Admin Email
+            <div className="animate-fade-in flex flex-col gap-6">
+              <form onSubmit={handleAdminLogin} className="text-left flex flex-col gap-5">
+                <div className="space-y-2">
+                  <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">System Identifier</label>
                   <input
                     type="email"
                     required
                     placeholder="admin@smartcampus.com"
                     value={adminLogin.email}
                     onChange={e => setAdminLogin({ ...adminLogin, email: e.target.value })}
-                    className="mt-2 !bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black"
+                    className="premium-input"
                   />
-                </label>
-                <label className="text-gray-900 font-black text-xs uppercase tracking-widest block mb-1">
-                  Password
-                  <div className="relative mt-2">
+                </div>
+                <div className="space-y-2">
+                  <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">Access Credentials</label>
+                  <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
                       value={adminLogin.password}
                       onChange={e => setAdminLogin({ ...adminLogin, password: e.target.value })}
-                      className="w-full pr-10 !bg-white !border-gray-200 !text-gray-900 !placeholder-gray-400 font-bold"
+                      className="premium-input pr-12"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      {showPassword ? (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" />
-                        </svg>
-                      ) : (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
+                      {showPassword ? <Lock className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                     </button>
                   </div>
-                </label>
-                <button type="submit" className="btn btn-primary mt-2 w-full py-3.5 font-black uppercase tracking-wider">
-                  Admin Sign In
+                </div>
+                <button type="submit" className="btn btn-primary w-full mt-2 group">
+                  Initialize Session <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </button>
               </form>
               
-              <div className="flex items-center gap-4 my-2">
-                <div className="h-[1px] flex-1 bg-white/10"></div>
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-widest">OR</span>
-                <div className="h-[1px] flex-1 bg-white/10"></div>
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-gray-200"></div>
+                <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">or secure sync</span>
+                <div className="h-px flex-1 bg-gray-200"></div>
               </div>
 
-              <a className="w-full bg-white border-2 border-gray-100 text-gray-900 py-4 px-5 text-sm hover:bg-gray-50 flex items-center justify-center gap-3 rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl" href={OAUTH_ENTRY_URL}>
-                <svg style={{ width: '22px', height: '22px' }} viewBox="0 0 24 24">
+              <a className="btn btn-google w-full flex items-center justify-center gap-4 group" href={OAUTH_ENTRY_URL}>
+                <svg className="w-5 h-5 transition-transform group-hover:rotate-12" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continue with Google
+                Connect institutional account
               </a>
             </div>
           )}
 
 
-          {error ? <p className="text-red-400 mt-6 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p> : null}
+          {error ? (
+            <div className="mt-8 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 animate-fade-in">
+              <ShieldAlert className="w-5 h-5 text-red-500 shrink-0" />
+              <p className="text-red-600 text-xs font-black uppercase tracking-wider">{error}</p>
+            </div>
+          ) : null}
+          
+          <p className="mt-10 text-[10px] text-gray-900 font-black uppercase tracking-[0.2em] opacity-80">
+            System Node: Localhost-8080 // Build v0.0.1-Stable
+          </p>
         </div>
       </div>
     );
@@ -351,7 +364,7 @@ function App() {
     <div
       className="min-h-screen text-gray-100 flex overflow-hidden relative"
       style={{
-        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${bgImage}")`,
+        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${premiumBg}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -370,8 +383,8 @@ function App() {
             <LayoutDashboard className="text-white w-5 h-5" />
           </div>
           <div>
-            <h1 className="font-heading font-black text-xl leading-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase tracking-tighter">Operations Hub</h1>
-            <p className="text-[10px] text-accent-1 uppercase tracking-[0.2em] font-black">Smart Campus</p>
+            <h1 className="font-heading font-black text-xl leading-tight text-white uppercase tracking-tighter">Operations Hub</h1>
+            <p className="text-[10px] text-accent-1 uppercase tracking-[0.3em] font-black">Smart Campus</p>
           </div>
         </div>
 
@@ -414,7 +427,7 @@ function App() {
               <p className="text-sm font-bold text-white truncate">{user?.fullName}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${canManageRoles ? 'bg-green-400' : 'bg-blue-400'}`}></span>
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">
+                <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">
                   {canManageRoles ? 'System Admin' : 'Staff Member'}
                 </p>
               </div>
@@ -467,7 +480,7 @@ function App() {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-1/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Unread Alerts</p>
+                  <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Unread Alerts</p>
                   <h3 className="text-5xl font-heading font-black text-gray-900">{unreadCount}</h3>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-accent-1 text-white flex items-center justify-center shadow-lg">
@@ -480,7 +493,7 @@ function App() {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-2/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div>
                 <h2 className="text-3xl font-heading font-black text-gray-900 mb-1 uppercase tracking-tighter">Command Center</h2>
-                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Welcome back, {user.fullName}</p>
+                <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Welcome back, {user.fullName}</p>
               </div>
               <div className="hidden sm:block">
                 <div className="px-6 py-3 rounded-full bg-accent-2 text-white text-xs font-black tracking-[0.2em] uppercase shadow-lg">
@@ -517,8 +530,8 @@ function App() {
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-gray-500">
                       <CheckCircle className="w-8 h-8" />
                     </div>
-                    <h4 className="text-lg font-medium text-white mb-1">All caught up</h4>
-                    <p className="text-gray-400 text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
+                    <h4 className="text-lg font-black text-white mb-1">All caught up</h4>
+                    <p className="text-gray-300 font-black text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
                   </div>
                 )}
 
@@ -534,9 +547,9 @@ function App() {
                       <div className="flex-1 min-w-0 pr-6">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
                           <h4 className={`text-lg truncate font-black tracking-tight ${item.isRead ? 'text-gray-500' : 'text-gray-900'}`}>{item.title}</h4>
-                          <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.2em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.3em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-400' : 'text-gray-800'}`}>{item.message}</p>
+                        <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-600' : 'text-gray-900'}`}>{item.message}</p>
 
                         <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <button
@@ -565,7 +578,7 @@ function App() {
                   </h3>
                   <form className="space-y-4" onSubmit={submitNotification}>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Recipient Email</label>
+                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
                       <input
                         type="email"
                         placeholder="user@smartcampus.com"
@@ -576,7 +589,7 @@ function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Title</label>
+                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Title</label>
                       <input
                         placeholder="Subject of notification"
                         value={notificationForm.title}
@@ -624,7 +637,7 @@ function App() {
                       <TrendingUp className="w-6 h-6 text-accent-1" />
                       Campus Activity
                     </h3>
-                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Real-time system interaction metrics</p>
+                    <p className="text-[10px] text-gray-900 font-black uppercase tracking-[0.3em]">Real-time system interaction metrics</p>
                   </div>
 
                   <div className="h-[200px] w-full">
@@ -708,7 +721,7 @@ function App() {
                       {['Admin', 'Staff', 'Students'].map((label, i) => (
                         <div key={label} className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</span>
+                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">{label}</span>
                         </div>
                       ))}
                     </div>
