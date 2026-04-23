@@ -155,14 +155,20 @@ function App() {
 
   const submitNotification = async (event) => {
     event.preventDefault();
-    await apiClient.post('/notifications', notificationForm);
-    setNotificationForm({
-      recipientEmail: '',
-      title: '',
-      message: '',
-      type: 'INFO'
-    });
-    await loadNotifications();
+    try {
+      await apiClient.post('/notifications', notificationForm);
+      setNotificationForm({
+        recipientEmail: '',
+        title: '',
+        message: '',
+        type: 'INFO',
+        isBroadcast: false
+      });
+      await loadNotifications();
+    } catch (err) {
+      console.error('Failed to send broadcast:', err);
+      setError('Failed to dispatch alert. Please ensure system connectivity.');
+    }
   };
 
   const updateUserRole = async (email, newRole) => {
