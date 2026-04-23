@@ -18,7 +18,7 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
-  
+
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
   const [isLoginViewAdmin, setIsLoginViewAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -148,7 +148,7 @@ function App() {
 
   if (!user) {
     return (
-      <div 
+      <div
         className="min-h-screen flex items-center justify-center p-6 relative"
         style={{
           backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.7), rgba(10, 10, 10, 0.8)), url("${bgImage}")`,
@@ -160,15 +160,15 @@ function App() {
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-1 to-transparent"></div>
           <p className="inline-block mb-3 uppercase tracking-widest text-xs text-accent-1 font-bold">Smart Campus Operations Hub</p>
           <h1 className="text-4xl mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Secure Access Portal</h1>
-          
+
           <div className="flex gap-2 p-1 bg-black/40 rounded-xl mb-8 mt-6 w-full border border-white/5">
-            <button 
+            <button
               onClick={() => { setIsLoginViewAdmin(false); setError(''); }}
               className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${!isLoginViewAdmin ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-gray-400 hover:text-white'}`}
             >
               Standard Staff
             </button>
-            <button 
+            <button
               onClick={() => { setIsLoginViewAdmin(true); setError(''); }}
               className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${isLoginViewAdmin ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-gray-400 hover:text-white'}`}
             >
@@ -181,10 +181,10 @@ function App() {
               <p className="text-gray-400">Use your institutional Google account to continue.</p>
               <a className="w-full mt-6 bg-white text-gray-900 py-3.5 px-5 text-base shadow-[0_4px_15px_rgba(255,255,255,0.1)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(255,255,255,0.2)] hover:bg-gray-50 flex items-center justify-center gap-3 rounded-xl font-semibold transition-all" href={OAUTH_ENTRY_URL}>
                 <svg style={{ width: '22px', height: '22px' }} viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 Continue with Google
               </a>
@@ -193,28 +193,28 @@ function App() {
             <form onSubmit={handleAdminLogin} className="animate-fade-in text-left flex flex-col gap-4 mt-2">
               <label className="text-gray-300">
                 Admin Email
-                <input 
-                  type="email" 
-                  required 
+                <input
+                  type="email"
+                  required
                   placeholder="admin@smartcampus.com"
                   value={adminLogin.email}
-                  onChange={e => setAdminLogin({...adminLogin, email: e.target.value})}
+                  onChange={e => setAdminLogin({ ...adminLogin, email: e.target.value })}
                   className="mt-1"
                 />
               </label>
               <label className="text-gray-300 block">
                 Password
                 <div className="relative mt-1">
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    required 
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
                     placeholder="••••••••"
                     value={adminLogin.password}
-                    onChange={e => setAdminLogin({...adminLogin, password: e.target.value})}
+                    onChange={e => setAdminLogin({ ...adminLogin, password: e.target.value })}
                     className="w-full pr-10"
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
                   >
@@ -244,7 +244,7 @@ function App() {
   }
 
   const getNotificationIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'SUCCESS': return <CheckCircle className="text-green-400 w-5 h-5" />;
       case 'WARNING': return <AlertTriangle className="text-yellow-400 w-5 h-5" />;
       case 'CRITICAL': return <XOctagon className="text-red-400 w-5 h-5" />;
@@ -253,7 +253,7 @@ function App() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen text-gray-100 flex overflow-hidden relative"
       style={{
         backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.85), rgba(10, 10, 10, 0.95)), url("${dashboardBg}")`,
@@ -326,7 +326,7 @@ function App() {
         </header>
 
         <div className="p-6 md:p-10 max-w-[1200px] w-full mx-auto animate-fade-in space-y-8">
-          
+
           {/* Top Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="glass-card relative overflow-hidden group">
@@ -341,7 +341,7 @@ function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="glass-card relative overflow-hidden group md:col-span-2 flex items-center justify-between">
               <div className="absolute inset-0 bg-gradient-to-br from-accent-2/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div>
@@ -349,9 +349,9 @@ function App() {
                 <p className="text-gray-400 text-sm">Here's what's happening across the campus today.</p>
               </div>
               <div className="hidden sm:block">
-                 <div className="px-4 py-2 rounded-full border border-accent-2/30 bg-accent-2/10 text-accent-2 text-sm font-bold tracking-wide uppercase">
-                   {user.role.replace('ROLE_', '')}
-                 </div>
+                <div className="px-4 py-2 rounded-full border border-accent-2/30 bg-accent-2/10 text-accent-2 text-sm font-bold tracking-wide uppercase">
+                  {user.role.replace('ROLE_', '')}
+                </div>
               </div>
             </div>
           </div>
@@ -387,12 +387,12 @@ function App() {
                     <p className="text-gray-400 text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
                   </div>
                 )}
-                
+
                 {notifications.map((item) => (
                   <div key={item.id} className={`group relative p-5 rounded-2xl border transition-all duration-300 ${item.isRead ? 'bg-panel-light border-panel-border opacity-70' : 'bg-white/10 border-white/20 shadow-lg shadow-black/20'}`}>
                     {/* Unread dot */}
                     {!item.isRead && <div className="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-accent-1 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
-                    
+
                     <div className="flex gap-4 sm:gap-5 items-start">
                       <div className={`mt-1 shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${item.isRead ? 'bg-black/20' : 'bg-black/40 border border-white/5 shadow-inner'}`}>
                         {getNotificationIcon(item.type)}
@@ -400,10 +400,10 @@ function App() {
                       <div className="flex-1 min-w-0 pr-6">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
                           <h4 className={`text-base truncate font-medium ${item.isRead ? 'text-gray-300' : 'text-white'}`}>{item.title}</h4>
-                          <span className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
+                          <span className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <p className={`text-sm leading-relaxed ${item.isRead ? 'text-gray-500' : 'text-gray-300'}`}>{item.message}</p>
-                        
+
                         <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <button
                             type="button"
@@ -512,7 +512,7 @@ function App() {
                       </div>
                     ))}
                     {users.length === 0 && !error && (
-                       <p className="text-sm text-gray-500 italic text-center py-4">No users loaded.</p>
+                      <p className="text-sm text-gray-500 italic text-center py-4">No users loaded.</p>
                     )}
                   </div>
                 </section>
