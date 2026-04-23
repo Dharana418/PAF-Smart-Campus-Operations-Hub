@@ -109,4 +109,8 @@ public class UserAccountService {
         if (assignedDate != null) user.setAssignedDate(assignedDate != null && !assignedDate.isBlank() ? java.time.LocalDate.parse(assignedDate) : null);
         return toProfile(userAccountRepository.save(user));
     }
+
+    public java.util.List<UserAccount> getAllUsersRaw() {
+        return userAccountRepository.findAll();
+    }
 }
