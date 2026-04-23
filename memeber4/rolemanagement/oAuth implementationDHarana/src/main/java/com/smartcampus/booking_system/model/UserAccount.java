@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Document(collection = "user_accounts")
 public class UserAccount {
@@ -22,6 +23,8 @@ public class UserAccount {
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDate birthday;
+    private LocalDate assignedDate;
 
     public UserAccount() {
         this.createdAt = LocalDateTime.now();
@@ -98,5 +101,21 @@ public class UserAccount {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public LocalDate getAssignedDate() {
+        return assignedDate;
+    }
+
+    public void setAssignedDate(LocalDate assignedDate) {
+        this.assignedDate = assignedDate;
     }
 }
