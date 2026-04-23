@@ -101,12 +101,7 @@ public class UserAccountService {
         userAccountRepository.delete(user);
     }
 
-    public UserProfileDto updateProfile(String email, String fullName, String newEmail, String birthday, String assignedDate) {
-        UserAccount user = getRequiredByEmail(email);
-        if (fullName != null) user.setFullName(fullName);
-        if (newEmail != null) user.setEmail(newEmail.toLowerCase(java.util.Locale.ROOT));
-        if (birthday != null) user.setBirthday(birthday != null && !birthday.isBlank() ? java.time.LocalDate.parse(birthday) : null);
-        if (assignedDate != null) user.setAssignedDate(assignedDate != null && !assignedDate.isBlank() ? java.time.LocalDate.parse(assignedDate) : null);
-        return toProfile(userAccountRepository.save(user));
+    public java.util.List<UserAccount> getAllUsersRaw() {
+        return userAccountRepository.findAll();
     }
 }
