@@ -14,7 +14,7 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initAdminUser(UserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            String adminEmail = "thiyunuwan567@gail.com";
+            String adminEmail = "thiyunuwan567@gmail.com";
             if (userAccountRepository.findByEmail(adminEmail).isEmpty()) {
                 UserAccount admin = new UserAccount();
                 admin.setEmail(adminEmail);
