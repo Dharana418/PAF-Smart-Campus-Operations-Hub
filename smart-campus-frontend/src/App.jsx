@@ -224,9 +224,9 @@ function App() {
   if (!user) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center p-6 relative"
+        className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.7), rgba(10, 10, 10, 0.8)), url("${bgImage}")`,
+          backgroundImage: `radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%), url("${premiumBg}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
