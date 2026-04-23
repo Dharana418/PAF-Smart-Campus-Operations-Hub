@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle } from 'lucide-react';
+import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle, XOctagon } from 'lucide-react';
 
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT', 'ROLE_TECHNICIAN'];
 
@@ -125,12 +125,21 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
   const [filterRole, setFilterRole] = useState('ALL');
   const [updating, setUpdating] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const today = new Date().toISOString().split('T')[0];
   
   const [editUser, setEditUser] = useState(null);
   const [deleteEmail, setDeleteEmail] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
   const [editForm, setEditForm] = useState({ fullName: '', email: '', birthday: '', assignedDate: '' });
-  const [registerForm, setRegisterForm] = useState({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: '' });
+  const [registerForm, setRegisterForm] = useState({ 
+    fullName: '', 
+    email: '', 
+    role: 'ROLE_STUDENT', 
+    birthday: '', 
+    assignedDate: today 
+  });
 
   const handleRoleChange = async (email, newRole) => {
     setUpdating(email);
@@ -175,20 +184,41 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
       await onUpdateProfile(email, editForm);
       setSuccessMsg(`Profile synchronized for ${email}`);
       setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      setErrorMsg('Profile synchronization failed.');
+      setTimeout(() => setErrorMsg(''), 3000);
     } finally {
       setUpdating(null);
     }
   };
 
+  const handleNameChange = (e) => {
+    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    setRegisterForm({ ...registerForm, fullName: val });
+  };
+
   const handleConfirmRegister = async (e) => {
     e.preventDefault();
-    setShowRegister(false);
+    setErrorMsg('');
+
+    // Validation: 20+ Age (Born 2006 or earlier)
+    if (registerForm.birthday) {
+      const birthYear = new Date(registerForm.birthday).getFullYear();
+      if (birthYear > 2006) {
+        setErrorMsg('Security Policy: Registry restricted to ages 20+ (Birth Year 2006 or earlier)');
+        return;
+      }
+    }
+
     setUpdating(registerForm.email);
     try {
       await onRegisterUser(registerForm);
       setSuccessMsg(`New profile authorized for ${registerForm.email}`);
       setTimeout(() => setSuccessMsg(''), 3000);
-      setRegisterForm({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: '' });
+      setRegisterForm({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: today });
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Registration failed.');
+      setTimeout(() => setErrorMsg(''), 5000);
     } finally {
       setUpdating(null);
     }
@@ -231,7 +261,7 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
             <input
               placeholder="e.g. Johnathan Doe"
               value={registerForm.fullName}
-              onChange={e => setRegisterForm({ ...registerForm, fullName: e.target.value })}
+              onChange={handleNameChange}
               required
               className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
             />
@@ -271,8 +301,8 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
             <input
               type="date"
               value={registerForm.assignedDate}
-              onChange={e => setRegisterForm({ ...registerForm, assignedDate: e.target.value })}
-              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+              readOnly
+              className="!bg-gray-100 !border-gray-100 !text-gray-400 font-black h-14 cursor-not-allowed"
             />
           </div>
           <div className="flex items-end">
@@ -305,13 +335,25 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
         </div>
       </div>
 
-      {/* Success toast */}
-      {successMsg && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm font-medium animate-fade-in">
-          <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-          {successMsg}
-        </div>
-      )}
+      {/* Notifications toast */}
+      <div className="fixed bottom-10 right-10 z-[100] space-y-4">
+        {successMsg && (
+          <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-green-500 shadow-2xl animate-slide-up">
+            <div className="p-2 bg-green-500 rounded-xl">
+              <Check className="w-5 h-5 text-white" />
+            </div>
+            <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{successMsg}</p>
+          </div>
+        )}
+        {errorMsg && (
+          <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-red-500 shadow-2xl animate-slide-up">
+            <div className="p-2 bg-red-500 rounded-xl">
+              <XOctagon className="w-5 h-5 text-white" />
+            </div>
+            <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{errorMsg}</p>
+          </div>
+        )}
+      </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
