@@ -129,10 +129,8 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
   const [editUser, setEditUser] = useState(null);
   const [deleteEmail, setDeleteEmail] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
-  const [alertUser, setAlertUser] = useState(null);
   const [editForm, setEditForm] = useState({ fullName: '', email: '', birthday: '', assignedDate: '' });
   const [registerForm, setRegisterForm] = useState({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: '' });
-  const [alertForm, setAlertForm] = useState({ title: '', message: '', type: 'INFO' });
 
   const handleRoleChange = async (email, newRole) => {
     setUpdating(email);
@@ -196,19 +194,6 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
     }
   };
 
-  const handleSendAlert = async (e) => {
-    e.preventDefault();
-    const email = alertUser.email;
-    setAlertUser(null);
-    try {
-      await onSendNotification({ ...alertForm, recipientEmail: email });
-      setSuccessMsg(`Custom alert dispatched to ${email}`);
-      setTimeout(() => setSuccessMsg(''), 3000);
-      setAlertForm({ title: '', message: '', type: 'INFO' });
-    } catch (err) {
-      // Error handled in App.jsx
-    }
-  };
 
   const filtered = useMemo(() => {
     return users.filter(u => {
@@ -392,13 +377,6 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
                       />
                       <div className="flex items-center gap-2 ml-2">
                         <button 
-                          onClick={() => setAlertUser(profile)}
-                          className="p-2.5 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white transition-all shadow-sm group"
-                          title="Send Custom Alert"
-                        >
-                          <Bell className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        </button>
-                        <button 
                           onClick={() => startEdit(profile)}
                           className="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm group"
                           title="Update Profile"
@@ -548,51 +526,6 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
             <div className="pt-6 flex gap-3">
               <button type="button" onClick={() => setShowRegister(false)} className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all">Cancel</button>
               <button type="submit" className="flex-1 px-6 py-3.5 bg-accent-1 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-accent-1/30 hover:-translate-y-0.5 transition-all">Register User</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {/* Custom Alert Modal */}
-      {alertUser && (
-        <Modal title={`Dispatch Alert: ${alertUser.fullName}`} onClose={() => setAlertUser(null)}>
-          <form onSubmit={handleSendAlert} className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Alert Title</label>
-              <input
-                placeholder="e.g., Access Level Changed"
-                value={alertForm.title}
-                onChange={e => setAlertForm({ ...alertForm, title: e.target.value })}
-                required
-                className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Alert Message</label>
-              <textarea
-                placeholder="Details of the alert..."
-                value={alertForm.message}
-                onChange={e => setAlertForm({ ...alertForm, message: e.target.value })}
-                required
-                rows="4"
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 font-black text-sm outline-none focus:border-accent-1 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Alert Type</label>
-              <select
-                value={alertForm.type}
-                onChange={e => setAlertForm({ ...alertForm, type: e.target.value })}
-                className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-              >
-                {['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'].map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="pt-6 flex gap-3">
-              <button type="button" onClick={() => setAlertUser(null)} className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all">Abort</button>
-              <button type="submit" className="flex-1 px-6 py-3.5 bg-orange-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-orange-600/30 hover:-translate-y-0.5 transition-all">Dispatch Alert</button>
             </div>
           </form>
         </Modal>

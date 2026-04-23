@@ -1,7 +1,6 @@
 package com.smartcampus.booking_system.service;
 
 import com.smartcampus.booking_system.dto.UserProfileDto;
-import com.smartcampus.booking_system.model.NotificationType;
 import com.smartcampus.booking_system.model.RoleType;
 import com.smartcampus.booking_system.model.UserAccount;
 import com.smartcampus.booking_system.repository.UserAccountRepository;
@@ -10,7 +9,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +16,13 @@ import org.springframework.stereotype.Service;
 public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
-    private final NotificationService notificationService;
     private final Set<String> adminEmails;
 
     public UserAccountService(
             UserAccountRepository userAccountRepository,
-            @Lazy NotificationService notificationService,
             @Value("${app.security.admin-emails:}") String adminEmails
     ) {
         this.userAccountRepository = userAccountRepository;
-        this.notificationService = notificationService;
         this.adminEmails = Arrays.stream(adminEmails.split(","))
                 .map(String::trim)
                 .map(value -> value.toLowerCase(Locale.ROOT))
@@ -82,16 +77,7 @@ public class UserAccountService {
     public UserProfileDto updateRole(String email, RoleType role) {
         UserAccount user = getRequiredByEmail(email);
         user.setRole(role);
-        UserAccount saved = userAccountRepository.save(user);
-        
-        notificationService.createNotification(
-            email,
-            "Security Alert: Access Role Updated",
-            "Your campus access role has been updated to " + role.name().replace("ROLE_", "") + " by a system administrator.",
-            NotificationType.SUCCESS
-        );
-        
-        return toProfile(saved);
+        return toProfile(userAccountRepository.save(user));
     }
 
     public UserProfileDto createUser(String fullName, String email, RoleType role, String birthday, String assignedDate) {
@@ -121,16 +107,6 @@ public class UserAccountService {
         if (newEmail != null) user.setEmail(newEmail.toLowerCase(java.util.Locale.ROOT));
         if (birthday != null) user.setBirthday(birthday != null && !birthday.isBlank() ? java.time.LocalDate.parse(birthday) : null);
         if (assignedDate != null) user.setAssignedDate(assignedDate != null && !assignedDate.isBlank() ? java.time.LocalDate.parse(assignedDate) : null);
-        
-        UserAccount saved = userAccountRepository.save(user);
-        
-        notificationService.createNotification(
-            email,
-            "Profile Synchronized",
-            "Your institutional profile details have been updated and synchronized with the campus registry.",
-            NotificationType.INFO
-        );
-        
-        return toProfile(saved);
+        return toProfile(userAccountRepository.save(user));
     }
 }
