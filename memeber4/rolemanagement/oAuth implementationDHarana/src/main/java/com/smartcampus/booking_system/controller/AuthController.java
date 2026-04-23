@@ -14,16 +14,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.BadCredentialsException;
+
 @RestController
 @RequestMapping("/api")
 public class AuthController {
 
     private final UserAccountService userAccountService;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UserAccountService userAccountService, JwtService jwtService) {
+    public AuthController(UserAccountService userAccountService, JwtService jwtService, PasswordEncoder passwordEncoder) {
         this.userAccountService = userAccountService;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/me")
@@ -32,11 +37,19 @@ public class AuthController {
         return ResponseEntity.ok(userAccountService.toProfile(user));
     }
 
-    // Development-friendly email-only login: returns JWT for an existing user by email.
-    // WARNING: This endpoint is intended for development/demo use only.
     @PostMapping("/public/auth/dev-login")
     public ResponseEntity<LoginResponse> devLogin(@RequestBody LoginRequest req) {
         UserAccount user = userAccountService.getRequiredByEmail(req.getEmail());
+        
+        if (user.getPassword() != null && !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        } else if (user.getPassword() == null && req.getPassword() != null && !req.getPassword().isEmpty()) {
+            // Option to handle users without password but attempt was made
+            // Could throw, but keeping old behavior for backwards compatibility
+            // if no password was set on the user.
+            throw new BadCredentialsException("Invalid credentials");
+        }
+        
         String token = jwtService.generateToken(user.getEmail(), user.getFullName(), user.getRole());
         return ResponseEntity.ok(new LoginResponse(token));
     }
