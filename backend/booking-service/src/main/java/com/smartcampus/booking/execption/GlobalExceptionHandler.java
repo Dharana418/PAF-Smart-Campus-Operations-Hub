@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(SecurityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleSecurityViolation(SecurityViolationException ex) {
+        return buildError(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
