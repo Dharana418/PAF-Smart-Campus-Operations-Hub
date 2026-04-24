@@ -1,0 +1,4 @@
+#!/bin/sh
+MAVEN_PROJECTBASEDIR=\D:\Projects\PAF-Smart-Campus-Operations-Hub\backend
+MAVEN_HOME="\/.mvn/wrapper/maven-wrapper.jar"
+exec java -jar "\" "\$@"
