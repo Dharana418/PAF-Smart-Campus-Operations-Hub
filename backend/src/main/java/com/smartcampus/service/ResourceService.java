@@ -60,7 +60,6 @@ public class ResourceService {
             resource.setAvailableFrom(resourceDetails.getAvailableFrom());
             resource.setAvailableTo(resourceDetails.getAvailableTo());
             resource.setStatus(resourceDetails.getStatus());
-            resource.setImageUrl(resourceDetails.getImageUrl());
             return resourceRepository.save(resource);
         }
         return null;
