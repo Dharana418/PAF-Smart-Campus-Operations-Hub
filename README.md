@@ -1,73 +1,57 @@
 # PAF-Smart-Campus-Operations-Hub
 
-Advanced implementation added for:
-- Google OAuth2 login integration
-- Role-based authorization (ADMIN, STAFF, STUDENT)
-- Notifications management APIs and UI
-- Spring Boot backend + React frontend integration
+Advanced implementation of the Smart Campus Operations Hub, featuring a modernized frontend-first architecture.
 
-## Project Modules
+## Project Structure
 
-- `booking-system`: Spring Boot backend with Security, OAuth2, JWT, Role Management, Notifications
-- `smart-campus-frontend`: React + Vite frontend for login, notifications, and role admin panel
+This repository is organized into a frontend-first monorepo structure:
 
-## Backend Features (`booking-system`)
+- **Root (`/`)**: React + Vite frontend application.
+- **`backend/`**: Consolidated backend services and modules.
+  - `backend/core-api`: Primary Spring Boot backend (Auth, Security, Notifications).
+  - `backend/facilities-catalogue`: Resource and facilities management module.
+  - `backend/role-management`: OAuth integration and role assignment logic.
 
-- OAuth2 login via Google at `/oauth2/authorization/google`
-- OAuth success handler generates JWT and redirects to frontend callback
-- JWT-protected REST APIs
-- Role-based API access:
-	- `ROLE_ADMIN`: full access including role management
-	- `ROLE_STAFF`: create notifications
-	- `ROLE_STUDENT`: read notifications
-- Seeded users:
-	- `admin@smartcampus.com` (`ROLE_ADMIN`)
-	- `staff@smartcampus.com` (`ROLE_STAFF`)
+## Key Features
 
-### Main API Endpoints
+- **Google OAuth2 Integration**: Secure institutional login.
+- **Role-Based Access Control**: Strict permissions for `ADMIN`, `STAFF`, and `STUDENT`.
+- **Notification Engine**: Real-time broadcast and targeted operational alerts.
+- **Modern UI**: Premium, high-contrast dashboard using Tailwind CSS and Lucide icons.
 
-- `GET /api/me` - current authenticated user profile
-- `GET /api/notifications` - list current user notifications + unread count
-- `POST /api/notifications` - create notification (ADMIN or STAFF)
-- `PATCH /api/notifications/{notificationId}/read?read=true|false` - mark notification read/unread
-- `GET /api/admin/users` - list users (ADMIN only)
-- `PATCH /api/admin/users/{email}/role` - update user role (ADMIN only)
+## Running the Project
 
-## Google OAuth Setup
-
-Update `booking-system/src/main/resources/application.properties`:
-
-- `spring.security.oauth2.client.registration.google.client-id`
-- `spring.security.oauth2.client.registration.google.client-secret`
-
-In Google Cloud Console, add authorized redirect URI:
-
-- `http://localhost:8080/login/oauth2/code/google`
-
-## Run Backend
+### 1. Backend Services
+Navigate to the core API module and run with Maven:
 
 ```powershell
-cd booking-system
-./mvnw.cmd spring-boot:run
+cd backend/core-api
+./mvnw spring-boot:run
 ```
+*Default URL: `http://localhost:8080`*
 
-Backend default URL: `http://localhost:8080`
-
-## Run Frontend
+### 2. Frontend Application
+Install dependencies and start the Vite dev server from the root directory:
 
 ```powershell
-cd smart-campus-frontend
 npm install
 npm run dev
 ```
+*Default URL: `http://localhost:5173`*
 
-Frontend default URL: `http://localhost:5173`
+## Environment Configuration
 
-## Frontend Environment (Optional)
+### Backend OAuth Setup
+Update `backend/core-api/src/main/resources/application.properties` with your Google credentials:
+- `spring.security.oauth2.client.registration.google.client-id`
+- `spring.security.oauth2.client.registration.google.client-secret`
 
-You can override defaults by creating `.env` in `smart-campus-frontend`:
+Authorized Redirect URI: `http://localhost:8080/login/oauth2/code/google`
 
+### Frontend Environment
+Optional configuration in a root `.env` file:
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_OAUTH_ENTRY_URL=http://localhost:8080/oauth2/authorization/google
 ```
+
