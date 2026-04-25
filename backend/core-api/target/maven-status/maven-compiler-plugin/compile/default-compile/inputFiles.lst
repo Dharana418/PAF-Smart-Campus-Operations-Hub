@@ -1,6 +1,6 @@
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\service\ResourceService.java
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\repository\ResourceRepository.java
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\controller\ResourceController.java
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\model\CurrentOccupancy.java
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\SmartCampusApplication.java
-D:\Projects\PAF-Smart-Campus-Operations-Hub\backend\src\main\java\com\smartcampus\model\Resource.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\repository\ResourceRepository.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\model\CurrentOccupancy.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\service\ResourceService.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\SmartCampusApplication.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\controller\ResourceController.java
+C:\Users\HP\Desktop\PAF\PAF-Smart-Campus-Operations-Hub\backend\core-api\src\main\java\com\smartcampus\model\Resource.java
