@@ -1,4 +1,4 @@
-import { Calendar, Clock, AlertCircle, CheckCircle, ArrowRight, Zap, MapPin } from 'lucide-react';
+import { Calendar, Clock, AlertCircle, CheckCircle, ArrowRight, Zap, MapPin, Users } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function StudentDashboard({ user, stats }) {

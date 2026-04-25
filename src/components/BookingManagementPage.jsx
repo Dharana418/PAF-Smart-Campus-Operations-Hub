@@ -25,7 +25,7 @@ export default function BookingManagementPage({ user }) {
         try {
             setLoading(true);
             const [bResp, rResp] = await Promise.all([
-                apiClient.get(isAdmin ? '/api/bookings' : '/api/bookings/my'),
+                apiClient.get(isAdmin ? '/bookings' : '/bookings/my'),
                 apiClient.get('/facilities/resources')
             ]);
             setBookings(bResp.data);
@@ -40,7 +40,7 @@ export default function BookingManagementPage({ user }) {
     const handleBooking = async (e) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/bookings', bookingForm);
+            await apiClient.post('/bookings', bookingForm);
             setShowBookModal(false);
             loadData();
             alert('Booking request submitted successfully!');
@@ -56,7 +56,7 @@ export default function BookingManagementPage({ user }) {
             if (reason === null) return;
         }
         try {
-            await apiClient.patch(`/api/bookings/${id}/status`, { status, reason });
+            await apiClient.patch(`/bookings/${id}/status`, { status, reason });
             loadData();
         } catch (err) {
             alert('Failed to update status');
@@ -66,7 +66,7 @@ export default function BookingManagementPage({ user }) {
     const cancelBooking = async (id) => {
         if (!window.confirm('Cancel this booking?')) return;
         try {
-            await apiClient.post(`/api/bookings/${id}/cancel`);
+            await apiClient.post(`/bookings/${id}/cancel`);
             loadData();
         } catch (err) {
             alert('Failed to cancel booking');
