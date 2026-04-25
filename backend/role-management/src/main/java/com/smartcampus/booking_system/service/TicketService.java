@@ -47,11 +47,14 @@ public class TicketService {
 
         // Notify reporter
         notificationService.createNotification(
-            ticket.getReporterEmail(),
-            "Ticket Status Updated",
-            "Your ticket " + ticket.getId() + " is now " + status + (reason != null ? ". Reason: " + reason : ""),
-            status.equals("RESOLVED") ? "SUCCESS" : (status.equals("REJECTED") ? "CRITICAL" : "INFO"),
-            false
+            "system@smartcampus.com",
+            new com.smartcampus.booking_system.dto.CreateNotificationRequest(
+                "Ticket Status Updated",
+                "Your ticket " + ticket.getId() + " is now " + status + (reason != null ? ". Reason: " + reason : ""),
+                com.smartcampus.booking_system.model.NotificationType.valueOf(status.equals("RESOLVED") ? "SUCCESS" : (status.equals("REJECTED") ? "CRITICAL" : "INFO")),
+                ticket.getReporterEmail(),
+                false
+            )
         );
 
         return saved;
@@ -92,11 +95,14 @@ public class TicketService {
 
         if (recipient != null) {
             notificationService.createNotification(
-                recipient,
-                "New Comment on Ticket",
-                "There is a new comment on ticket " + ticket.getId() + " from " + authorEmail,
-                "INFO",
-                false
+                authorEmail,
+                new com.smartcampus.booking_system.dto.CreateNotificationRequest(
+                    "New Comment on Ticket",
+                    "There is a new comment on ticket " + ticket.getId() + " from " + authorEmail,
+                    com.smartcampus.booking_system.model.NotificationType.INFO,
+                    recipient,
+                    false
+                )
             );
         }
 

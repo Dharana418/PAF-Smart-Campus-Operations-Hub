@@ -52,11 +52,14 @@ public class BookingService {
         
         // Notify user
         notificationService.createNotification(
-            booking.getUserEmail(),
-            "Booking Status Updated",
-            "Your booking for resource " + booking.getResourceId() + " has been " + status + (reason != null ? ". Reason: " + reason : "."),
-            status.equals("APPROVED") ? "SUCCESS" : (status.equals("REJECTED") ? "CRITICAL" : "INFO"),
-            false
+            "system@smartcampus.com",
+            new com.smartcampus.booking_system.dto.CreateNotificationRequest(
+                "Booking Status Updated",
+                "Your booking for resource " + booking.getResourceId() + " has been " + status + (reason != null ? ". Reason: " + reason : "."),
+                com.smartcampus.booking_system.model.NotificationType.valueOf(status.equals("APPROVED") ? "SUCCESS" : (status.equals("REJECTED") ? "CRITICAL" : "INFO")),
+                booking.getUserEmail(),
+                false
+            )
         );
         
         return saved;
