@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle, XOctagon } from 'lucide-react';
+import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle, XOctagon, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 
@@ -125,13 +125,9 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
   const [showRegister, setShowRegister] = useState(false);
   const [editForm, setEditForm] = useState({ fullName: '', email: '', birthday: '', assignedDate: '' });
   const [registerForm, setRegisterForm] = useState({ 
-    fullName: '', 
-    email: '', 
-    role: 'ROLE_STUDENT', 
-    birthday: '', 
-    assignedDate: today,
     password: '' 
   });
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleRoleChange = async (email, newRole) => {
@@ -308,14 +304,23 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Access Credentials (Password)</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={registerForm.password}
-              onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
-              required
-              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
-            />
+            <div className="relative">
+              <input
+                type={showRegPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={registerForm.password}
+                onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
+                required
+                className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14 w-full pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowRegPassword(!showRegPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-900 transition-colors"
+              >
+                {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Birth Date</label>
