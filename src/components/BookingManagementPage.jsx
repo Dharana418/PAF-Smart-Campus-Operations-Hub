@@ -26,7 +26,7 @@ export default function BookingManagementPage({ user }) {
             setLoading(true);
             const [bResp, rResp] = await Promise.all([
                 apiClient.get(isAdmin ? '/api/bookings' : '/api/bookings/my'),
-                apiClient.get('/api/resources')
+                apiClient.get('/facilities/resources')
             ]);
             setBookings(bResp.data);
             setResources(rResp.data.filter(r => r.status === 'ACTIVE'));

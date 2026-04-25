@@ -2,7 +2,6 @@ package com.smartcampus.booking_system.service;
 
 import com.smartcampus.booking_system.model.Resource;
 import com.smartcampus.booking_system.repository.ResourceRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,9 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ResourceService {
     private final ResourceRepository resourceRepository;
+
+    public ResourceService(ResourceRepository resourceRepository) {
+        this.resourceRepository = resourceRepository;
+    }
 
     public List<Resource> getAllResources() {
         return resourceRepository.findAll();

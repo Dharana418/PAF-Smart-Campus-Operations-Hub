@@ -2,7 +2,6 @@ package com.smartcampus.booking_system.service;
 
 import com.smartcampus.booking_system.model.Booking;
 import com.smartcampus.booking_system.repository.BookingRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,10 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+
+    public BookingService(BookingRepository bookingRepository, NotificationService notificationService) {
+        this.bookingRepository = bookingRepository;
+        this.notificationService = notificationService;
+    }
 
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();

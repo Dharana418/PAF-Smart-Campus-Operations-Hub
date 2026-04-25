@@ -7,7 +7,6 @@ import com.smartcampus.booking_system.model.Notification;
 import com.smartcampus.booking_system.model.UserAccount;
 import com.smartcampus.booking_system.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationService {
@@ -95,7 +94,8 @@ public class NotificationService {
             throw new IllegalStateException("Unauthorized to update this notification");
         }
 
-        notification.setTitle(request.title());
+        notification
+        .setTitle(request.title());
         notification.setMessage(request.message());
         notification.setType(request.type());
         

@@ -74,7 +74,9 @@ function App() {
       localStorage.setItem('campus_access_token', response.data.token);
       initializeApp();
     } catch (err) {
-      setError('Invalid admin credentials.');
+      console.error('Admin login error details:', err.response?.data);
+      const message = err.response?.data?.message || err.response?.data?.error || err.message || 'Invalid admin credentials.';
+      setError(`Admin Gateway Error: ${message}`);
     } finally {
       setLoggingIn(false);
     }
@@ -95,7 +97,9 @@ function App() {
       setLoginForm({ email: '', password: '' });
       await initializeApp();
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      console.error('Login error details:', err.response?.data);
+      const message = err.response?.data?.message || err.response?.data?.error || err.message || 'Invalid email or password';
+      setError(`Login failed: ${message}`);
     } finally {
       setLoggingIn(false);
     }
