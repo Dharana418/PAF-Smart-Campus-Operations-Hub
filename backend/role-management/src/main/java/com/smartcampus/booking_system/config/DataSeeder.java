@@ -179,8 +179,25 @@ public class DataSeeder {
         t.setTitle(title);
         t.setPriority(priority);
         t.setStatus(status);
-        t.setDescription("Sample description for " + title);
+        t.setDescription("Automated diagnostic report: " + title + ". Evidence attached.");
         t.setCreatedAt(LocalDateTime.now().minusDays(3));
+        
+        // Add Sample Attachments (Assignment Module C requirement)
+        t.setImageAttachments(Arrays.asList(
+            "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
+            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800"
+        ));
+
+        // Add Sample Comments (Assignment Module C requirement)
+        List<IncidentTicket.Comment> comments = new ArrayList<>();
+        comments.add(new IncidentTicket.Comment("c1", email, "I noticed this issue during my 8 AM lecture.", LocalDateTime.now().minusDays(2)));
+        comments.add(new IncidentTicket.Comment("c2", techEmail, "Acknowledged. I will visit the location this afternoon.", LocalDateTime.now().minusDays(1)));
+        if ("RESOLVED".equals(status) || "CLOSED".equals(status)) {
+            comments.add(new IncidentTicket.Comment("c3", techEmail, "Resolution applied: Replaced faulty cable and tested connectivity.", LocalDateTime.now().minusMinutes(30)));
+            t.setResolutionNotes("Replaced HDMI cable and updated firmware.");
+        }
+        t.setComments(comments);
+        
         return t;
     }
 
@@ -214,7 +231,6 @@ public class DataSeeder {
                     return newUser;
                 });
 
-        // Ensure password is set/updated if provided
         if (password != null && !password.isBlank()) {
             user.setPassword(passwordEncoder.encode(password));
         }
@@ -229,6 +245,7 @@ public class DataSeeder {
         notification.setType(type);
         notification.setRead(false);
         notification.setRecipient(recipient);
+        notification.setCreatedAt(LocalDateTime.now().minusHours((int)(Math.random() * 48)));
         return notification;
     }
 }
