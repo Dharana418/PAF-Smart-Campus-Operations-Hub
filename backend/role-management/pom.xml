@@ -63,11 +63,11 @@
 
 
 
-    <!-- Lombok (optional but highly recommended) -->
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <optional>true</optional>
+        <version>1.18.34</version>
+        <scope>provided</scope>
     </dependency>
 
 	<!-- JWT -->
@@ -111,6 +111,13 @@
 				<version>3.11.0</version>
 				<configuration>
 					<release>${java.version}</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.34</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 			<plugin>
