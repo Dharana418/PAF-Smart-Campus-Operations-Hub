@@ -15,4 +15,6 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     Optional<Notification> findByIdAndRecipient(String id, UserAccount recipient);
 
     long countByRecipientAndIsReadFalse(UserAccount recipient);
+
+    long countByRecipient(UserAccount recipient);
 }
