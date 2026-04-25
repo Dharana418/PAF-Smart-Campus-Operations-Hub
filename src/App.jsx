@@ -637,7 +637,14 @@ function App() {
                 'dharana.thilakarahena@gmail.com'
               ]}
             />
-          ) : (<>
+          ) : activePage === 'resources' ? (
+            <ResourceCataloguePage user={user} />
+          ) : activePage === 'bookings' ? (
+            <BookingManagementPage user={user} />
+          ) : activePage === 'incidents' ? (
+            <IncidentTicketingPage user={user} />
+          ) : (
+            <>
           {/* Top Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group">
