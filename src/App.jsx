@@ -11,7 +11,8 @@ import {
   AlertTriangle, 
   XOctagon,
   Calendar,
-  LayoutDashboard, 
+  LayoutDashboard,
+  LayoutGrid as Layout,
   ShieldAlert, 
   PieChart as PieChartIcon,
   Send,
@@ -207,8 +208,8 @@ function App() {
   const loadDashboardStats = async () => {
     try {
       const [bResp, tResp] = await Promise.all([
-        apiClient.get('/api/bookings/my'),
-        apiClient.get('/api/tickets/my')
+        apiClient.get('/bookings/my'),
+        apiClient.get('/tickets/my')
       ]);
       setStats({ bookings: bResp.data, tickets: tResp.data });
     } catch (err) {
