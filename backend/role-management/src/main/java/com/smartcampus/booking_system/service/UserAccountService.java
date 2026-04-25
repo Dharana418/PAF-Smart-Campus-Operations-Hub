@@ -16,13 +16,16 @@ import org.springframework.stereotype.Service;
 public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final Set<String> adminEmails;
 
     public UserAccountService(
             UserAccountRepository userAccountRepository,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
             @Value("${app.security.admin-emails:}") String adminEmails
     ) {
         this.userAccountRepository = userAccountRepository;
+        this.passwordEncoder = passwordEncoder;
         this.adminEmails = Arrays.stream(adminEmails.split(","))
                 .map(String::trim)
                 .map(value -> value.toLowerCase(Locale.ROOT))
@@ -80,7 +83,7 @@ public class UserAccountService {
         return toProfile(userAccountRepository.save(user));
     }
 
-    public UserProfileDto createUser(String fullName, String email, RoleType role, String birthday, String assignedDate) {
+    public UserProfileDto createUser(String fullName, String email, String password, RoleType role, String birthday, String assignedDate) {
         String normalizedEmail = email.toLowerCase(java.util.Locale.ROOT);
         if (userAccountRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException("User already exists: " + email);
@@ -88,6 +91,9 @@ public class UserAccountService {
         UserAccount user = new UserAccount();
         user.setFullName(fullName);
         user.setEmail(normalizedEmail);
+        if (password != null && !password.isBlank()) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
         user.setRole(role != null ? role : RoleType.ROLE_STUDENT);
         user.setProvider("manual");
         user.setProviderId(normalizedEmail);

@@ -38,6 +38,7 @@ public class AdminController {
         return ResponseEntity.ok(userAccountService.createUser(
                 request.fullName(),
                 request.email(),
+                request.password(),
                 request.role(),
                 request.birthday(),
                 request.assignedDate()
