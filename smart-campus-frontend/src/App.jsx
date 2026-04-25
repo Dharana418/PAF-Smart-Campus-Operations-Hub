@@ -22,7 +22,10 @@ import {
   ShieldAlert,
   BarChart3,
   PieChart as PieChartIcon,
-  Send
+  Send,
+  Calendar,
+  Tool,
+  ClipboardList
 } from 'lucide-react';
 import {
   LineChart,
@@ -41,6 +44,9 @@ import {
 import RoleManagementPage from './components/RoleManagementPage';
 import SentNotificationsPage from './components/SentNotificationsPage';
 import LandingPage from './components/LandingPage';
+import ResourceCataloguePage from './components/ResourceCataloguePage';
+import BookingManagementPage from './components/BookingManagementPage';
+import IncidentTicketingPage from './components/IncidentTicketingPage';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
@@ -460,18 +466,51 @@ function App() {
                     )}
                   </button>
                 )}
-                {canCreateNotifications && (
-                  <button
-                    onClick={() => setActivePage('sent')}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${activePage === 'sent'
-                        ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.4)]'
-                        : 'hover:bg-white/5 text-gray-400 hover:text-white'
-                      }`}
-                  >
-                    <Send className="w-5 h-5" />
-                    Sent Alerts
-                  </button>
-                )}
+                <button
+                  onClick={() => setActivePage('sent')}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${activePage === 'sent'
+                      ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.4)]'
+                      : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <Send className="w-5 h-5" />
+                  Sent Alerts
+                </button>
+                
+                <div className="pt-4 pb-2 px-4 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] border-t border-white/5 mt-4">Operations</div>
+                
+                <button
+                  onClick={() => setActivePage('resources')}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${activePage === 'resources'
+                      ? 'bg-emerald-600 text-white shadow-[0_8px_20px_rgba(16,185,129,0.4)]'
+                      : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <Layout className="w-5 h-5" />
+                  Resources
+                </button>
+                
+                <button
+                  onClick={() => setActivePage('bookings')}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${activePage === 'bookings'
+                      ? 'bg-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.4)]'
+                      : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <Calendar className="w-5 h-5" />
+                  Bookings
+                </button>
+                
+                <button
+                  onClick={() => setActivePage('incidents')}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${activePage === 'incidents'
+                      ? 'bg-rose-600 text-white shadow-[0_8px_20px_rgba(225,29,72,0.4)]'
+                      : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <AlertTriangle className="w-5 h-5" />
+                  Incidents
+                </button>
               </nav>
 
               <div className="mt-auto pt-6 border-t border-white/5">
@@ -526,12 +565,19 @@ function App() {
                     onRefresh={() => loadUsersIfAdmin('ROLE_ADMIN')}
                     currentUserEmail={user.email}
                     adminWhitelist={[
-                      'admin@smartcampus.com',
-                      'thiyunuwan567@gmail.com',
-                      'dharana.thilakarahena@gmail.com'
-                    ]}
-                  />
-                ) : (<>
+                    'admin@smartcampus.com',
+                    'thiyunuwan567@gmail.com',
+                    'dharana.thilakarahena@gmail.com'
+                  ]}
+                />
+              ) : activePage === 'resources' ? (
+                <ResourceCataloguePage user={user} />
+              ) : activePage === 'bookings' ? (
+                <BookingManagementPage user={user} />
+              ) : activePage === 'incidents' ? (
+                <IncidentTicketingPage user={user} />
+              ) : (
+                <>
                   {/* Top Stats Row */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group">
