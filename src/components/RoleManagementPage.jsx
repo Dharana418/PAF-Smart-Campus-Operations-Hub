@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Users, Search, Filter, ChevronDown, Check, Shield, GraduationCap, Wrench, Star, X, RefreshCw, Trash2, Edit3, Save, PlusCircle, XOctagon, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Check, Shield, GraduationCap, Star, X, XOctagon, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 
 const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 

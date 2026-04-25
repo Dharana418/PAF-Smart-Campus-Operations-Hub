@@ -1,33 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from './api/client';
 import { 
-  Users, 
   Shield, 
   Bell, 
-  Search, 
-  RefreshCw, 
-  Layout, 
-  Activity, 
   TrendingUp,
-  Mail,
   Lock,
   ArrowRight,
-  PlusCircle, 
   CheckCircle, 
   Info, 
   AlertTriangle, 
   XOctagon,
   Calendar,
-  LogOut, 
   LayoutDashboard, 
   ShieldAlert, 
-  BarChart3,
   PieChart as PieChartIcon,
-  Send
+  Send,
+  LogOut
 } from 'lucide-react';
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -45,11 +35,12 @@ import LandingPage from './components/LandingPage';
 import ResourceCataloguePage from './components/ResourceCataloguePage';
 import BookingManagementPage from './components/BookingManagementPage';
 import IncidentTicketingPage from './components/IncidentTicketingPage';
+import StudentDashboard from './components/StudentDashboard';
+import StaffDashboard from './components/StaffDashboard';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
 
-const roleOptions = ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_STUDENT'];
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
 import premiumBg from './assets/premium_security_background_1776952085682.png';
@@ -63,6 +54,7 @@ function App() {
   const [error, setError] = useState('');
   const [activePage, setActivePage] = useState('dashboard');
   const [showLogin, setShowLogin] = useState(false);
+  const [stats, setStats] = useState({ bookings: [], tickets: [] });
 
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -159,7 +151,8 @@ function App() {
       try {
         await Promise.all([
           loadNotifications().catch(e => console.error('Failed to load notifications:', e)),
-          loadUsersIfAdmin(meResponse.data.role).catch(e => console.error('Failed to load users:', e))
+          loadUsersIfAdmin(meResponse.data.role).catch(e => console.error('Failed to load users:', e)),
+          loadDashboardStats().catch(e => console.error('Failed to load stats:', e))
         ]);
       } catch (secondaryError) {
         console.error('Error in secondary data loading:', secondaryError);
@@ -204,6 +197,18 @@ function App() {
     }
     const response = await apiClient.get('/admin/users');
     setUsers(response.data);
+  };
+
+  const loadDashboardStats = async () => {
+    try {
+      const [bResp, tResp] = await Promise.all([
+        apiClient.get('/api/bookings/my'),
+        apiClient.get('/api/tickets/my')
+      ]);
+      setStats({ bookings: bResp.data, tickets: tResp.data });
+    } catch (err) {
+      console.error('Failed to load stats:', err);
+    }
   };
 
   const logout = () => {
@@ -277,6 +282,308 @@ function App() {
       setError('Failed to register user.');
       throw err;
     }
+  };
+
+  const renderMainContent = () => {
+    if (activePage === 'sent') return <SentNotificationsPage />;
+    if (activePage === 'roles' && canManageRoles) {
+      return (
+        <RoleManagementPage
+          users={users}
+          onUpdateRole={updateUserRole}
+          onDeleteUser={deleteUser}
+          onUpdateProfile={updateProfile}
+          onRegisterUser={registerUser}
+          onRefresh={() => loadUsersIfAdmin('ROLE_ADMIN')}
+          currentUserEmail={user.email}
+          adminWhitelist={[
+            'admin@smartcampus.com',
+            'thiyunuwan567@gmail.com',
+            'dharana.thilakarahena@gmail.com'
+          ]}
+        />
+      );
+    }
+    if (activePage === 'resources') return <ResourceCataloguePage user={user} />;
+    if (activePage === 'bookings') return <BookingManagementPage user={user} />;
+    if (activePage === 'incidents') return <IncidentTicketingPage user={user} />;
+
+    // Role-specific Dashboards
+    if (user?.role === 'ROLE_STUDENT') return <StudentDashboard user={user} stats={stats} />;
+    if (user?.role === 'ROLE_STAFF') return <StaffDashboard user={user} stats={stats} />;
+
+    // Default Admin Dashboard
+    return (
+      <div className="space-y-8 animate-fade-in">
+        {/* Top Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-1/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Unread Alerts</p>
+                <h3 className="text-5xl font-heading font-black text-gray-900">{unreadCount}</h3>
+              </div>
+              <div className="w-14 h-14 rounded-2xl bg-accent-1 text-white flex items-center justify-center shadow-lg">
+                <Bell className="w-7 h-7" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group md:col-span-2 flex items-center justify-between">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-2/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div>
+              <h2 className="text-3xl font-heading font-black text-gray-900 mb-1 uppercase tracking-tighter">Command Center</h2>
+              <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Welcome back, {user.fullName}</p>
+            </div>
+            <div className="hidden sm:block">
+              <div className="px-6 py-3 rounded-full bg-accent-2 text-white text-xs font-black tracking-[0.2em] uppercase shadow-lg">
+                {user.role.replace('ROLE_', '')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+            <AlertTriangle className="text-red-400 w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-red-400 font-semibold text-sm">System Error</h4>
+              <p className="text-red-300/80 text-sm mt-1">{error}</p>
+              <p className="text-red-300/60 text-xs mt-2">Note: Please ensure the backend server has connected to MongoDB Atlas.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Notifications Feed */}
+          <section className="xl:col-span-2 space-y-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-3xl font-heading font-black flex items-center gap-4 text-white uppercase tracking-tighter">
+                Activity Logs
+                <span className="bg-white/20 text-[11px] px-4 py-1.5 rounded-full text-white font-black border-2 border-white/10 shadow-lg">{notifications.length}</span>
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              {notifications.length === 0 && !error && (
+                <div className="glass-card flex flex-col items-center justify-center py-16 text-center border-dashed">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-gray-500">
+                    <CheckCircle className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-lg font-black text-white mb-1">All caught up</h4>
+                  <p className="text-gray-300 font-black text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
+                </div>
+              )}
+
+              {notifications.map((item) => (
+                <div key={item.id} className={`group relative p-6 rounded-3xl border transition-all duration-300 ${item.isRead ? 'bg-white/40 border-gray-200 opacity-60' : 'bg-white/95 border-white shadow-2xl shadow-black/20'}`}>
+                  {!item.isRead && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-accent-1 shadow-[0_0_15px_rgba(59,130,246,0.5)]" />}
+                  <div className="flex gap-5 items-start">
+                    <div className={`mt-1 shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center ${item.isRead ? 'bg-gray-200' : 'bg-accent-1 text-white shadow-lg'}`}>
+                      {getNotificationIcon(item.type)}
+                    </div>
+                    <div className="flex-1 min-w-0 pr-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
+                        <h4 className={`text-lg truncate font-black tracking-tight ${item.isRead ? 'text-gray-500' : 'text-gray-900'}`}>{item.title}</h4>
+                        <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.3em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-600' : 'text-gray-900'}`}>{item.message}</p>
+                      <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button
+                          type="button"
+                          className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-1 hover:text-accent-2 transition-colors"
+                          onClick={() => markRead(item.id, !item.isRead)}
+                        >
+                          {item.isRead ? 'Mark as active' : 'Archive Entry'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Right Sidebar Columns */}
+          <div className="space-y-8">
+            {canCreateNotifications && (
+              <section className="bg-white/95 backdrop-blur-2xl p-7 rounded-[32px] border border-white shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-accent-1 to-accent-2" />
+                <h3 className="text-xl font-heading font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
+                  <TrendingUp className="w-6 h-6 text-accent-1" />
+                  Global Broadcast
+                </h3>
+                <form className="space-y-4" onSubmit={submitNotification}>
+                  <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                    <input
+                      type="checkbox"
+                      id="isBroadcast"
+                      checked={notificationForm.isBroadcast}
+                      onChange={(e) => setNotificationForm(c => ({ ...c, isBroadcast: e.target.checked, recipientEmail: e.target.checked ? '' : c.recipientEmail }))}
+                      className="w-5 h-5 rounded-lg border-2 border-gray-200 text-accent-1 focus:ring-accent-1 cursor-pointer"
+                    />
+                    <label htmlFor="isBroadcast" className="text-xs font-black text-gray-900 uppercase tracking-widest cursor-pointer">Broadcast to all users</label>
+                  </div>
+
+                  {!notificationForm.isBroadcast && (
+                    <div className="animate-fade-in">
+                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
+                      <input
+                        type="email"
+                        placeholder="user@smartcampus.com"
+                        value={notificationForm.recipientEmail}
+                        onChange={(e) => setNotificationForm(c => ({ ...c, recipientEmail: e.target.value }))}
+                        required={!notificationForm.isBroadcast}
+                        className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black mb-4"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Title</label>
+                    <input
+                      placeholder="Subject of notification"
+                      value={notificationForm.title}
+                      onChange={(e) => setNotificationForm(c => ({ ...c, title: e.target.value }))}
+                      required
+                      className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Message</label>
+                    <textarea
+                      rows={3}
+                      placeholder="Type your message here..."
+                      value={notificationForm.message}
+                      onChange={(e) => setNotificationForm(c => ({ ...c, message: e.target.value }))}
+                      required
+                      className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Priority</label>
+                    <select
+                      value={notificationForm.type}
+                      onChange={(e) => setNotificationForm(c => ({ ...c, type: e.target.value }))}
+                      className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
+                    >
+                      {notificationTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button type="submit" className="btn btn-primary w-full mt-4 py-4 text-xs font-black uppercase tracking-widest shadow-xl">
+                    Send Notification
+                  </button>
+                </form>
+              </section>
+            )}
+
+            {canManageRoles && (
+              <>
+                {/* Advanced Analytics Section */}
+                <section className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl space-y-8">
+                  <div>
+                    <h3 className="text-xl font-black mb-1 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
+                      <TrendingUp className="w-6 h-6 text-accent-1" />
+                      Campus Activity
+                    </h3>
+                    <p className="text-[10px] text-gray-900 font-black uppercase tracking-[0.3em]">Real-time system interaction metrics</p>
+                  </div>
+
+                  <div className="h-[200px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={[
+                        { name: 'Mon', value: 400 },
+                        { name: 'Tue', value: 300 },
+                        { name: 'Wed', value: 600 },
+                        { name: 'Thu', value: 800 },
+                        { name: 'Fri', value: 500 },
+                        { name: 'Sat', value: 900 },
+                        { name: 'Sun', value: 1100 },
+                      ]}>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} 
+                        />
+                        <YAxis hide />
+                        <ReTooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#fff', 
+                            borderRadius: '16px', 
+                            border: 'none', 
+                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                            fontSize: '12px',
+                            fontWeight: '900'
+                          }} 
+                        />
+                        <Area type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Peak Time</p>
+                      <p className="text-2xl font-black text-gray-900">14:00</p>
+                    </div>
+                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Syncs</p>
+                      <p className="text-2xl font-black text-gray-900">2.4k</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
+                      <PieChartIcon className="w-6 h-6 text-accent-2" />
+                      Role Distribution
+                    </h3>
+                    <div className="h-[180px] flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Admin', value: users.filter(u => u.role === 'ROLE_ADMIN').length },
+                              { name: 'Staff', value: users.filter(u => u.role === 'ROLE_STAFF').length },
+                              { name: 'Students', value: users.filter(u => u.role === 'ROLE_STUDENT').length },
+                            ]}
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={8}
+                            dataKey="value"
+                          >
+                            <Cell fill="#3B82F6" />
+                            <Cell fill="#10B981" />
+                            <Cell fill="#F59E0B" />
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-center gap-4 mt-4">
+                      {['Admin', 'Staff', 'Students'].map((label, i) => (
+                        <div key={label} className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -637,303 +944,7 @@ function App() {
         </header>
 
         <div className="p-6 md:p-10 max-w-[1200px] w-full mx-auto space-y-8">
-
-          {activePage === 'sent' ? (
-            <SentNotificationsPage />
-          ) : activePage === 'roles' && canManageRoles ? (
-            <RoleManagementPage
-              users={users}
-              onUpdateRole={updateUserRole}
-              onDeleteUser={deleteUser}
-              onUpdateProfile={updateProfile}
-              onRegisterUser={registerUser}
-              onRefresh={() => loadUsersIfAdmin('ROLE_ADMIN')}
-              currentUserEmail={user.email}
-              adminWhitelist={[
-                'admin@smartcampus.com',
-                'thiyunuwan567@gmail.com',
-                'dharana.thilakarahena@gmail.com'
-              ]}
-            />
-          ) : activePage === 'resources' ? (
-            <ResourceCataloguePage user={user} />
-          ) : activePage === 'bookings' ? (
-            <BookingManagementPage user={user} />
-          ) : activePage === 'incidents' ? (
-            <IncidentTicketingPage user={user} />
-          ) : (
-            <>
-          {/* Top Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-1/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Unread Alerts</p>
-                  <h3 className="text-5xl font-heading font-black text-gray-900">{unreadCount}</h3>
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-accent-1 text-white flex items-center justify-center shadow-lg">
-                  <Bell className="w-7 h-7" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group md:col-span-2 flex items-center justify-between">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-2/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div>
-                <h2 className="text-3xl font-heading font-black text-gray-900 mb-1 uppercase tracking-tighter">Command Center</h2>
-                <p className="text-gray-900 text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Welcome back, {user.fullName}</p>
-              </div>
-              <div className="hidden sm:block">
-                <div className="px-6 py-3 rounded-full bg-accent-2 text-white text-xs font-black tracking-[0.2em] uppercase shadow-lg">
-                  {user.role.replace('ROLE_', '')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-              <AlertTriangle className="text-red-400 w-5 h-5 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-red-400 font-semibold text-sm">System Error</h4>
-                <p className="text-red-300/80 text-sm mt-1">{error}</p>
-                <p className="text-red-300/60 text-xs mt-2">Note: Please ensure the backend server has connected to MongoDB Atlas.</p>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Notifications Feed */}
-            <section className="xl:col-span-2 space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-3xl font-heading font-black flex items-center gap-4 text-white uppercase tracking-tighter">
-                  Activity Logs
-                  <span className="bg-white/20 text-[11px] px-4 py-1.5 rounded-full text-white font-black border-2 border-white/10 shadow-lg">{notifications.length}</span>
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                {notifications.length === 0 && !error && (
-                  <div className="glass-card flex flex-col items-center justify-center py-16 text-center border-dashed">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-gray-500">
-                      <CheckCircle className="w-8 h-8" />
-                    </div>
-                    <h4 className="text-lg font-black text-white mb-1">All caught up</h4>
-                    <p className="text-gray-300 font-black text-sm max-w-[250px]">You don't have any new notifications at the moment.</p>
-                  </div>
-                )}
-
-                {notifications.map((item) => (
-                  <div key={item.id} className={`group relative p-6 rounded-3xl border transition-all duration-300 ${item.isRead ? 'bg-white/40 border-gray-200 opacity-60' : 'bg-white/95 border-white shadow-2xl shadow-black/20'}`}>
-                    {/* Unread dot */}
-                    {!item.isRead && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-accent-1 shadow-[0_0_15px_rgba(59,130,246,0.5)]" />}
-
-                    <div className="flex gap-5 items-start">
-                      <div className={`mt-1 shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center ${item.isRead ? 'bg-gray-200' : 'bg-accent-1 text-white shadow-lg'}`}>
-                        {getNotificationIcon(item.type)}
-                      </div>
-                      <div className="flex-1 min-w-0 pr-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
-                          <h4 className={`text-lg truncate font-black tracking-tight ${item.isRead ? 'text-gray-500' : 'text-gray-900'}`}>{item.title}</h4>
-                          <span className="text-[10px] text-accent-1 font-black uppercase tracking-[0.3em]">{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                        <p className={`text-sm leading-relaxed font-black ${item.isRead ? 'text-gray-600' : 'text-gray-900'}`}>{item.message}</p>
-
-                        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <button
-                            type="button"
-                            className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-1 hover:text-accent-2 transition-colors"
-                            onClick={() => markRead(item.id, !item.isRead)}
-                          >
-                            {item.isRead ? 'Mark as active' : 'Archive Entry'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Right Sidebar Columns */}
-            <div className="space-y-8">
-              {canCreateNotifications && (
-                <section className="bg-white/95 backdrop-blur-2xl p-7 rounded-[32px] border border-white shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-accent-1 to-accent-2" />
-                  <h3 className="text-xl font-heading font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
-                    <TrendingUp className="w-6 h-6 text-accent-1" />
-                    Global Broadcast
-                  </h3>
-                  <form className="space-y-4" onSubmit={submitNotification}>
-                    <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                      <input
-                        type="checkbox"
-                        id="isBroadcast"
-                        checked={notificationForm.isBroadcast}
-                        onChange={(e) => setNotificationForm(c => ({ ...c, isBroadcast: e.target.checked, recipientEmail: e.target.checked ? '' : c.recipientEmail }))}
-                        className="w-5 h-5 rounded-lg border-2 border-gray-200 text-accent-1 focus:ring-accent-1 cursor-pointer"
-                      />
-                      <label htmlFor="isBroadcast" className="text-xs font-black text-gray-900 uppercase tracking-widest cursor-pointer">Broadcast to all users</label>
-                    </div>
-
-                    {!notificationForm.isBroadcast && (
-                      <div className="animate-fade-in">
-                        <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Recipient Email</label>
-                        <input
-                          type="email"
-                          placeholder="user@smartcampus.com"
-                          value={notificationForm.recipientEmail}
-                          onChange={(e) => setNotificationForm(c => ({ ...c, recipientEmail: e.target.value }))}
-                          required={!notificationForm.isBroadcast}
-                          className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black mb-4"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-2">Title</label>
-                      <input
-                        placeholder="Subject of notification"
-                        value={notificationForm.title}
-                        onChange={(e) => setNotificationForm(c => ({ ...c, title: e.target.value }))}
-                        required
-                        className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Message</label>
-                      <textarea
-                        rows={3}
-                        placeholder="Type your message here..."
-                        value={notificationForm.message}
-                        onChange={(e) => setNotificationForm(c => ({ ...c, message: e.target.value }))}
-                        required
-                        className="!bg-gray-50 !border-gray-200 !text-gray-900 !placeholder-gray-400 font-black resize-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Priority</label>
-                      <select
-                        value={notificationForm.type}
-                        onChange={(e) => setNotificationForm(c => ({ ...c, type: e.target.value }))}
-                        className="!bg-gray-50 !border-gray-200 !text-gray-900 font-black"
-                      >
-                        {notificationTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <button type="submit" className="btn btn-primary w-full mt-4 py-4 text-xs font-black uppercase tracking-widest shadow-xl">
-                      Send Notification
-                    </button>
-                  </form>
-                </section>
-              )}
-
-              {canManageRoles && (
-                <>
-                  {/* Advanced Analytics Section */}
-                  <section className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl space-y-8">
-                  <div>
-                    <h3 className="text-xl font-black mb-1 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
-                      <TrendingUp className="w-6 h-6 text-accent-1" />
-                      Campus Activity
-                    </h3>
-                    <p className="text-[10px] text-gray-900 font-black uppercase tracking-[0.3em]">Real-time system interaction metrics</p>
-                  </div>
-
-                  <div className="h-[200px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={[
-                        { name: 'Mon', value: 400 },
-                        { name: 'Tue', value: 300 },
-                        { name: 'Wed', value: 600 },
-                        { name: 'Thu', value: 800 },
-                        { name: 'Fri', value: 500 },
-                        { name: 'Sat', value: 900 },
-                        { name: 'Sun', value: 1100 },
-                      ]}>
-                        <defs>
-                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                        <XAxis 
-                          dataKey="name" 
-                          axisLine={false} 
-                          tickLine={false} 
-                          tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} 
-                        />
-                        <YAxis hide />
-                        <ReTooltip 
-                          contentStyle={{ 
-                            backgroundColor: '#fff', 
-                            borderRadius: '16px', 
-                            border: 'none', 
-                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                            fontSize: '12px',
-                            fontWeight: '900'
-                          }} 
-                        />
-                        <Area type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Peak Time</p>
-                      <p className="text-2xl font-black text-gray-900">14:00</p>
-                    </div>
-                    <div className="p-6 rounded-[32px] bg-gray-50 border border-gray-100">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Syncs</p>
-                      <p className="text-2xl font-black text-gray-900">2.4k</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 uppercase tracking-tighter">
-                      <PieChartIcon className="w-6 h-6 text-accent-2" />
-                      Role Distribution
-                    </h3>
-                    <div className="h-[180px] flex items-center justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: 'Admin', value: users.filter(u => u.role === 'ROLE_ADMIN').length },
-                              { name: 'Staff', value: users.filter(u => u.role === 'ROLE_STAFF').length },
-                              { name: 'Students', value: users.filter(u => u.role === 'ROLE_STUDENT').length },
-                            ]}
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={8}
-                            dataKey="value"
-                          >
-                            <Cell fill="#3B82F6" />
-                            <Cell fill="#10B981" />
-                            <Cell fill="#F59E0B" />
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex justify-center gap-4 mt-4">
-                      {['Admin', 'Staff', 'Students'].map((label, i) => (
-                        <div key={label} className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </section>
-                </>
-              )}
-            </div>
-          </div>
-          </>)}
+          {renderMainContent()}
         </div>
       </main>
     </div>
