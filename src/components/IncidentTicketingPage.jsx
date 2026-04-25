@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, MessageSquare, Tool, Clock, Shield, PlusCircle, Paperclip, Send, CheckCircle } from 'lucide-react';
+import { AlertTriangle, MessageSquare, Wrench, Clock, Shield, PlusCircle, Paperclip, Send, CheckCircle } from 'lucide-react';
 import { apiClient } from '../api/client';
 
 export default function IncidentTicketingPage({ user }) {

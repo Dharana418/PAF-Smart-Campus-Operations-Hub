@@ -16,7 +16,8 @@ import {
   CheckCircle, 
   Info, 
   AlertTriangle, 
-  XOctagon, 
+  XOctagon,
+  Calendar,
   LogOut, 
   LayoutDashboard, 
   ShieldAlert, 
@@ -141,11 +142,28 @@ function App() {
     try {
       console.log('Starting app initialization...');
       setLoading(true);
+      
+      const token = localStorage.getItem('campus_access_token');
+      if (!token) {
+        console.log('No token found, skipping authentication.');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const meResponse = await apiClient.get('/me');
       console.log('Me response received:', meResponse.data);
       setUser(meResponse.data);
+      
       console.log('Loading secondary data...');
-      await Promise.all([loadNotifications(), loadUsersIfAdmin(meResponse.data.role)]);
+      try {
+        await Promise.all([
+          loadNotifications().catch(e => console.error('Failed to load notifications:', e)),
+          loadUsersIfAdmin(meResponse.data.role).catch(e => console.error('Failed to load users:', e))
+        ]);
+      } catch (secondaryError) {
+        console.error('Error in secondary data loading:', secondaryError);
+      }
       
       // Role-based landing page redirection
       if (meResponse.data.role === 'ROLE_ADMIN') {
