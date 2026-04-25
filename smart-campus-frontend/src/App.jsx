@@ -67,8 +67,10 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
 
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [isLoginViewAdmin, setIsLoginViewAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -158,9 +160,8 @@ function App() {
       });
 
       localStorage.setItem('campus_access_token', response.data.token);
-      setUser(response.data.user);
       setLoginForm({ email: '', password: '' });
-      await Promise.all([loadNotifications(), loadUsersIfAdmin(response.data.user.role)]);
+      await initializeApp();
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
@@ -315,10 +316,50 @@ function App() {
               </div>
 
               {!isLoginViewAdmin ? (
-                <div className="space-y-6 animate-fade-in">
-                  <p className="text-gray-800 font-black text-sm leading-relaxed max-w-[300px] mx-auto">
-                    Authorized personnel only. Please verify your identity using institutional Google Auth.
-                  </p>
+                <div className="animate-fade-in flex flex-col gap-6">
+                  <form onSubmit={handleLogin} className="text-left flex flex-col gap-5">
+                    <div className="space-y-2">
+                      <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">Institutional Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="user@smartcampus.com"
+                        value={loginForm.email}
+                        onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
+                        className="premium-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">Password</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          required
+                          placeholder="••••••••"
+                          value={loginForm.password}
+                          onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+                          className="premium-input pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          {showPassword ? <Lock className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={loggingIn} className="btn btn-primary w-full mt-2 group">
+                      {loggingIn ? "Verifying..." : "Access Dashboard"} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </form>
+
+                  <div className="flex items-center gap-4">
+                    <div className="h-px flex-1 bg-gray-200"></div>
+                    <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">or SSO Access</span>
+                    <div className="h-px flex-1 bg-gray-200"></div>
+                  </div>
+
                   <a className="btn btn-google w-full flex items-center justify-center gap-4 group" href={OAUTH_ENTRY_URL}>
                     <svg className="w-6 h-6 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

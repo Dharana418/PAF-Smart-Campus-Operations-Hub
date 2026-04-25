@@ -37,6 +37,11 @@ public class AuthController {
         return ResponseEntity.ok(userAccountService.toProfile(user));
     }
 
+    @PostMapping("/public/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+        return devLogin(req);
+    }
+
     @PostMapping("/public/auth/dev-login")
     public ResponseEntity<LoginResponse> devLogin(@RequestBody LoginRequest req) {
         UserAccount user = userAccountService.getRequiredByEmail(req.getEmail());

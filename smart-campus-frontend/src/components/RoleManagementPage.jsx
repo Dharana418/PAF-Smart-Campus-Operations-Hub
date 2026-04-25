@@ -129,7 +129,8 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
     email: '', 
     role: 'ROLE_STUDENT', 
     birthday: '', 
-    assignedDate: today 
+    assignedDate: today,
+    password: '' 
   });
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -218,7 +219,7 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
       await onRegisterUser(registerForm);
       setSuccessMsg(`New profile authorized for ${registerForm.email}`);
       setTimeout(() => setSuccessMsg(''), 3000);
-      setRegisterForm({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: today });
+      setRegisterForm({ fullName: '', email: '', role: 'ROLE_STUDENT', birthday: '', assignedDate: today, password: '' });
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Registration failed.');
       setTimeout(() => setErrorMsg(''), 5000);
@@ -304,6 +305,17 @@ export default function RoleManagementPage({ users, onUpdateRole, onDeleteUser, 
             >
               {roleOptions.map(r => <option key={r} value={r}>{r.replace('ROLE_', '')}</option>)}
             </select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Access Credentials (Password)</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={registerForm.password}
+              onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
+              required
+              className="!bg-gray-50 !border-gray-100 !text-gray-900 font-black h-14"
+            />
           </div>
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Birth Date</label>
