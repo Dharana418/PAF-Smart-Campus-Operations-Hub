@@ -29,11 +29,11 @@ public class JwtService {
     public String generateToken(String email, String fullName, RoleType role) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .subject(email)
+                .setSubject(email)
                 .claim("name", fullName)
                 .claim("role", role.name())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(expirationMinutes, ChronoUnit.MINUTES)))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(expirationMinutes, ChronoUnit.MINUTES)))
                 .signWith(signingKey)
                 .compact();
     }
@@ -56,10 +56,10 @@ public class JwtService {
     }
 
     private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(signingKey)
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey)
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

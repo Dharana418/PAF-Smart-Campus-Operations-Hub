@@ -13,9 +13,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
-@RequiredArgsConstructor
 public class IncidentTicketController {
     private final TicketService ticketService;
+
+    public IncidentTicketController(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN', 'STAFF')")

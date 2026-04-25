@@ -30,7 +30,7 @@ export default function IncidentTicketingPage({ user }) {
             setLoading(true);
             const [tResp, rResp] = await Promise.all([
                 apiClient.get(isStaffOrAdmin ? '/api/tickets' : '/api/tickets/my'),
-                apiClient.get('/api/resources')
+                apiClient.get('/facilities/resources')
             ]);
             setTickets(tResp.data);
             setResources(rResp.data);

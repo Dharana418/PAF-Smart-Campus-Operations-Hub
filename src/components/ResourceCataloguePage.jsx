@@ -25,7 +25,7 @@ export default function ResourceCataloguePage({ user }) {
     const loadResources = async () => {
         try {
             setLoading(true);
-            const resp = await apiClient.get('/api/resources');
+            const resp = await apiClient.get('/facilities/resources');
             setResources(resp.data);
         } catch (err) {
             console.error('Failed to load resources', err);
@@ -37,7 +37,7 @@ export default function ResourceCataloguePage({ user }) {
     const handleAddResource = async (e) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/resources', newResource);
+            await apiClient.post('/facilities/resources', newResource);
             setShowAddModal(false);
             loadResources();
             setNewResource({ name: '', type: 'Lecture Hall', capacity: 50, location: '', status: 'ACTIVE' });
@@ -49,7 +49,7 @@ export default function ResourceCataloguePage({ user }) {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this resource?')) return;
         try {
-            await apiClient.delete(`/api/resources/${id}`);
+            await apiClient.delete(`/facilities/resources/${id}`);
             loadResources();
         } catch (err) {
             alert('Failed to delete resource');

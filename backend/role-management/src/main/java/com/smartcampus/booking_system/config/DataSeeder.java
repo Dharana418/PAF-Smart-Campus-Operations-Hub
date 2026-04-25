@@ -13,7 +13,8 @@ import com.smartcampus.booking_system.repository.ResourceRepository;
 import com.smartcampus.booking_system.repository.TicketRepository;
 import com.smartcampus.booking_system.repository.UserAccountRepository;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -47,7 +48,7 @@ public class DataSeeder {
                     RoleType.ROLE_ADMIN
             );
 
-            // Seed Dharana's Specific Account if different
+            // Seed Dharana's Specific Account
             getOrCreateUser(
                     userAccountRepository,
                     passwordEncoder,
@@ -75,34 +76,20 @@ public class DataSeeder {
                     RoleType.ROLE_STUDENT
             );
 
-            // Seed Additional Users for Role Management
+            // Seed Additional Users
             getOrCreateUser(userAccountRepository, passwordEncoder, "tech.user@smartcampus.com", "Technician Alpha", "Tech#1234", RoleType.ROLE_STAFF);
             getOrCreateUser(userAccountRepository, passwordEncoder, "intern.user@smartcampus.com", "Student Intern", "Intern#1234", RoleType.ROLE_STUDENT);
 
-            if (notificationRepository.count() <= 1) {
-                // Admin Notifications (5 Total)
+            // Notifications
+            if (notificationRepository.countByRecipient(admin) < 5) {
                 notificationRepository.save(createNotification("System Diagnostic Complete", "All modules are operating within normal parameters.", NotificationType.SUCCESS, admin));
                 notificationRepository.save(createNotification("Security Audit Pending", "Please review the access logs for the last 24 hours.", NotificationType.WARNING, admin));
                 notificationRepository.save(createNotification("Database Backup Successful", "Global snapshot has been stored in AWS S3.", NotificationType.SUCCESS, admin));
                 notificationRepository.save(createNotification("New Role Request", "User 'intern.user' requested elevated access.", NotificationType.INFO, admin));
                 notificationRepository.save(createNotification("Server Maintenance", "Core API cluster will restart at midnight.", NotificationType.CRITICAL, admin));
-                
-                // Student Notifications (5 Total)
-                notificationRepository.save(createNotification("Booking Approved", "Your request for MLH-01 has been approved.", NotificationType.SUCCESS, student));
-                notificationRepository.save(createNotification("Maintenance Update", "Technician assigned to your ticket #102.", NotificationType.INFO, student));
-                notificationRepository.save(createNotification("System Alert", "Main Library will be closed for maintenance tomorrow.", NotificationType.WARNING, student));
-                notificationRepository.save(createNotification("Booking Rejected", "MLH-01 is unavailable for the selected slot.", NotificationType.CRITICAL, student));
-                notificationRepository.save(createNotification("Ticket Resolved", "Issue with Projector P-101 has been fixed.", NotificationType.SUCCESS, student));
-
-                // Staff Notifications (5 Total)
-                notificationRepository.save(createNotification("New Maintenance Ticket", "A new fault has been reported in Block B.", NotificationType.INFO, staff));
-                notificationRepository.save(createNotification("Critical System Fault", "Server room temperature is exceeding limits.", NotificationType.CRITICAL, staff));
-                notificationRepository.save(createNotification("Inventory Update", "50 new lab kits have been added to the registry.", NotificationType.SUCCESS, staff));
-                notificationRepository.save(createNotification("Shift Reminder", "Your monitoring shift starts at 08:00 AM.", NotificationType.WARNING, staff));
-                notificationRepository.save(createNotification("Report Generated", "Weekly utilization report is ready for review.", NotificationType.INFO, staff));
             }
-
-            if (resourceRepository.count() == 0) {
+            
+            if (resourceRepository.count() < 5) {
                 resourceRepository.save(createResource("Main Lecture Hall (MLH-01)", "Lecture Hall", 200, "Block A", "ACTIVE"));
                 resourceRepository.save(createResource("Computing Lab 01 (CL-01)", "Lab", 50, "Block B", "ACTIVE"));
                 resourceRepository.save(createResource("Projector P-101", "Equipment", 1, "Media Center", "ACTIVE"));
@@ -110,50 +97,28 @@ public class DataSeeder {
                 resourceRepository.save(createResource("Conference Hall", "Lecture Hall", 150, "Block C", "OUT_OF_SERVICE"));
             }
 
-            if (bookingRepository.count() == 0) {
+            if (bookingRepository.count() < 10) {
                 List<Resource> resources = resourceRepository.findAll();
                 if (!resources.isEmpty()) {
                     String resId = resources.get(0).getId();
-                    // Student Bookings (5)
-                    bookingRepository.save(createBooking(resId, student.getEmail(), "Workshop", "APPROVED", -2));
-                    bookingRepository.save(createBooking(resId, student.getEmail(), "Study Session", "PENDING", 1));
-                    bookingRepository.save(createBooking(resId, student.getEmail(), "Club Meeting", "REJECTED", -5));
-                    bookingRepository.save(createBooking(resId, student.getEmail(), "Exam Prep", "APPROVED", 3));
-                    bookingRepository.save(createBooking(resId, student.getEmail(), "Final Project", "PENDING", 7));
-
-                    // Staff Bookings (5)
-                    bookingRepository.save(createBooking(resId, staff.getEmail(), "Resource Audit", "APPROVED", -1));
-                    bookingRepository.save(createBooking(resId, staff.getEmail(), "Staff Training", "PENDING", 2));
-                    bookingRepository.save(createBooking(resId, staff.getEmail(), "Equipment Setup", "APPROVED", 0));
-                    bookingRepository.save(createBooking(resId, staff.getEmail(), "Inventory Count", "APPROVED", 5));
-                    bookingRepository.save(createBooking(resId, staff.getEmail(), "Maintenance Check", "PENDING", 4));
-
-                    // Admin Bookings (5)
-                    bookingRepository.save(createBooking(resId, admin.getEmail(), "System Launch", "APPROVED", -10));
-                    bookingRepository.save(createBooking(resId, admin.getEmail(), "VIP Visit", "APPROVED", 0));
-                    bookingRepository.save(createBooking(resId, admin.getEmail(), "Emergency Meeting", "APPROVED", 1));
-                    bookingRepository.save(createBooking(resId, admin.getEmail(), "Board Review", "PENDING", 10));
-                    bookingRepository.save(createBooking(resId, admin.getEmail(), "Security Drill", "APPROVED", 15));
+                    if (bookingRepository.findByUserEmail(student.getEmail()).isEmpty()) {
+                        bookingRepository.save(createBooking(resId, student.getEmail(), "Workshop", "APPROVED", -2));
+                        bookingRepository.save(createBooking(resId, student.getEmail(), "Study Session", "PENDING", 1));
+                    }
+                    if (bookingRepository.findByUserEmail(staff.getEmail()).isEmpty()) {
+                        bookingRepository.save(createBooking(resId, staff.getEmail(), "Resource Audit", "APPROVED", -1));
+                    }
                 }
             }
 
-            if (ticketRepository.count() == 0) {
+            if (ticketRepository.count() < 5) {
                 List<Resource> resources = resourceRepository.findAll();
                 if (!resources.isEmpty()) {
                     String resId = resources.get(0).getId();
-                    // Tickets assigned to Staff (5)
-                    ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "Projector not working", "HIGH", "OPEN"));
-                    ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "AC making noise", "MEDIUM", "IN_PROGRESS"));
-                    ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "Broken chair", "LOW", "RESOLVED"));
-                    ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "Internet issues", "CRITICAL", "OPEN"));
-                    ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "Light bulb fused", "LOW", "CLOSED"));
-
-                    // Tickets assigned to Admin (5)
-                    ticketRepository.save(createTicket(resId, staff.getEmail(), admin.getEmail(), "Database Leak", "CRITICAL", "OPEN"));
-                    ticketRepository.save(createTicket(resId, staff.getEmail(), admin.getEmail(), "Auth Failure", "HIGH", "IN_PROGRESS"));
-                    ticketRepository.save(createTicket(resId, staff.getEmail(), admin.getEmail(), "Network Outage", "CRITICAL", "RESOLVED"));
-                    ticketRepository.save(createTicket(resId, staff.getEmail(), admin.getEmail(), "UI Glitch", "LOW", "OPEN"));
-                    ticketRepository.save(createTicket(resId, staff.getEmail(), admin.getEmail(), "Log Rotation Error", "MEDIUM", "CLOSED"));
+                    if (ticketRepository.findByAssignedTechnicianEmail(staff.getEmail()).isEmpty()) {
+                        ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "Projector not working", "HIGH", "OPEN"));
+                        ticketRepository.save(createTicket(resId, student.getEmail(), staff.getEmail(), "AC making noise", "MEDIUM", "IN_PROGRESS"));
+                    }
                 }
             }
         };
@@ -179,8 +144,13 @@ public class DataSeeder {
         t.setTitle(title);
         t.setPriority(priority);
         t.setStatus(status);
-        t.setDescription("Sample description for " + title);
+        t.setDescription("Automated diagnostic report: " + title);
         t.setCreatedAt(LocalDateTime.now().minusDays(3));
+        
+        List<IncidentTicket.Comment> comments = new ArrayList<>();
+        comments.add(new IncidentTicket.Comment(java.util.UUID.randomUUID().toString(), email, "I noticed this issue during my 8 AM lecture.", LocalDateTime.now().minusDays(2)));
+        t.setComments(comments);
+        
         return t;
     }
 
@@ -204,22 +174,32 @@ public class DataSeeder {
     ) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
         UserAccount user = userAccountRepository.findByEmail(normalizedEmail)
-                .orElseGet(() -> {
-                    UserAccount newUser = new UserAccount();
-                    newUser.setEmail(normalizedEmail);
-                    newUser.setFullName(name);
-                    newUser.setProvider("seed");
-                    newUser.setProviderId(normalizedEmail);
-                    newUser.setRole(role);
-                    return newUser;
-                });
+                .orElse(null);
 
-        // Ensure password is set/updated if provided
+        if (user == null) {
+            user = new UserAccount();
+            user.setEmail(normalizedEmail);
+            user.setFullName(name);
+            user.setProvider("seed");
+            user.setProviderId(normalizedEmail);
+            user.setRole(role);
+            if (password != null && !password.isBlank()) {
+                user.setPassword(passwordEncoder.encode(password));
+            }
+            return userAccountRepository.save(user);
+        }
+
+        // If user exists, we might want to update some fields but maybe not password every time
+        // However, to be safe for dev-login, we ensure the password matches what's in seeder
         if (password != null && !password.isBlank()) {
-            user.setPassword(passwordEncoder.encode(password));
+            // Only update if it doesn't match to avoid constant DB writes and salt changes
+            if (user.getPassword() == null || !passwordEncoder.matches(password, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(password));
+                return userAccountRepository.save(user);
+            }
         }
         
-        return userAccountRepository.save(user);
+        return user;
     }
 
     private Notification createNotification(String title, String message, NotificationType type, UserAccount recipient) {
@@ -229,6 +209,7 @@ public class DataSeeder {
         notification.setType(type);
         notification.setRead(false);
         notification.setRecipient(recipient);
+        notification.setCreatedAt(LocalDateTime.now().minusHours((int)(Math.random() * 48)));
         return notification;
     }
 }

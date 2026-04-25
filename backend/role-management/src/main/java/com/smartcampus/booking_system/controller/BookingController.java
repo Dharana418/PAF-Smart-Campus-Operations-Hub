@@ -32,7 +32,6 @@ public class BookingController {
     public ResponseEntity<?> requestBooking(@RequestBody Booking booking, Authentication auth) {
         try {
             booking.setUserEmail(auth.getName());
-            // In a real app, we'd get the user's name from the principal/database
             return ResponseEntity.ok(bookingService.requestBooking(booking));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
