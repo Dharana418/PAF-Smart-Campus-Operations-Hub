@@ -29,7 +29,7 @@ export default function IncidentTicketingPage({ user }) {
         try {
             setLoading(true);
             const [tResp, rResp] = await Promise.all([
-                apiClient.get(isStaffOrAdmin ? '/api/tickets' : '/api/tickets/my'),
+                apiClient.get(isStaffOrAdmin ? '/tickets' : '/tickets/my'),
                 apiClient.get('/facilities/resources')
             ]);
             setTickets(tResp.data);
@@ -44,7 +44,7 @@ export default function IncidentTicketingPage({ user }) {
     const handleCreateTicket = async (e) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/tickets', newTicket);
+            await apiClient.post('/tickets', newTicket);
             setShowNewModal(false);
             loadData();
             alert('Incident ticket created successfully.');
@@ -57,9 +57,9 @@ export default function IncidentTicketingPage({ user }) {
         e.preventDefault();
         if (!commentText.trim()) return;
         try {
-            await apiClient.post(`/api/tickets/${selectedTicket.id}/comments`, { content: commentText });
+            await apiClient.post(`/tickets/${selectedTicket.id}/comments`, { content: commentText });
             setCommentText('');
-            const updated = await apiClient.get(isStaffOrAdmin ? '/api/tickets' : '/api/tickets/my');
+            const updated = await apiClient.get(isStaffOrAdmin ? '/tickets' : '/tickets/my');
             setTickets(updated.data);
             setSelectedTicket(updated.data.find(t => t.id === selectedTicket.id));
         } catch (err) {
@@ -69,7 +69,7 @@ export default function IncidentTicketingPage({ user }) {
 
     const updateTicketStatus = async (status) => {
         try {
-            await apiClient.patch(`/api/tickets/${selectedTicket.id}/status`, { status });
+            await apiClient.patch(`/tickets/${selectedTicket.id}/status`, { status });
             loadData();
             setShowNewModal(false);
             setSelectedTicket(null);
