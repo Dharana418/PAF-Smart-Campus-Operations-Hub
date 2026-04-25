@@ -11,7 +11,8 @@ import {
   AlertTriangle, 
   XOctagon,
   Calendar,
-  LayoutDashboard, 
+  LayoutDashboard,
+  LayoutGrid as Layout,
   ShieldAlert, 
   PieChart as PieChartIcon,
   Send,
@@ -39,7 +40,8 @@ import StudentDashboard from './components/StudentDashboard';
 import StaffDashboard from './components/StaffDashboard';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
-const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
+const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API_BASE_URL ?? 'http://localhost:8081/api';
+const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8081/oauth2/authorization/google';
 
 const notificationTypes = ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL'];
 
@@ -67,7 +69,7 @@ function App() {
     setError('');
     setLoggingIn(true);
     try {
-      const response = await apiClient.post('/public/auth/dev-login', {
+      const response = await apiClient.post(`${AUTH_API_BASE_URL}/public/admin/login`, {
         email: adminLogin.email,
         password: adminLogin.password
       });
@@ -88,7 +90,7 @@ function App() {
     setLoggingIn(true);
 
     try {
-      const response = await apiClient.post('/public/login', {
+      const response = await apiClient.post(`${AUTH_API_BASE_URL}/public/login`, {
         email: loginForm.email,
         password: loginForm.password
       });
@@ -206,8 +208,8 @@ function App() {
   const loadDashboardStats = async () => {
     try {
       const [bResp, tResp] = await Promise.all([
-        apiClient.get('/api/bookings/my'),
-        apiClient.get('/api/tickets/my')
+        apiClient.get('/bookings/my'),
+        apiClient.get('/tickets/my')
       ]);
       setStats({ bookings: bResp.data, tickets: tResp.data });
     } catch (err) {

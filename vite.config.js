@@ -21,7 +21,7 @@ export default defineConfig({
       },
       // Keep support for the original /api path (defaulting to core or role management)
       '/api': {
-        target: 'http://localhost:8082',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         bypass: (req) => {
           if (req.url.startsWith('/api/roles') || req.url.startsWith('/api/facilities') || req.url.startsWith('/api/core')) {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.BadCredentialsException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -38,35 +39,52 @@ public class AuthController {
     }
 
     @PostMapping("/public/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        try {
-            return devLogin(req);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(java.util.Map.of("message", e.getMessage()));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401).body(java.util.Map.of("message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(java.util.Map.of("message", "Internal server error during authentication"));
-        }
-    }
+public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    try {
+        UserAccount user = userAccountService.getRequiredByEmail(req.getEmail());
 
-    @PostMapping("/public/auth/dev-login")
-    public ResponseEntity<LoginResponse> devLogin(@RequestBody LoginRequest req) {
+        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
+
+        String token = jwtService.generateToken(
+            user.getEmail(),
+            user.getFullName(),
+            user.getRole()
+        );
+
+        return ResponseEntity.ok(new LoginResponse(token));
+
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+    } catch (BadCredentialsException e) {
+        return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
+    }
+}
+    @PostMapping("/public/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest req) {
         try {
             UserAccount user = userAccountService.getRequiredByEmail(req.getEmail());
-            
-            if (user.getPassword() != null && !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-                throw new BadCredentialsException("Invalid credentials");
-            } else if (user.getPassword() == null && req.getPassword() != null && !req.getPassword().isEmpty()) {
+
+            if (user.getRole() == null || !"ROLE_ADMIN".equals(user.getRole().name())) {
+                throw new BadCredentialsException("Not an admin account");
+            }
+
+            if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
                 throw new BadCredentialsException("Invalid credentials");
             }
-            
-            String token = jwtService.generateToken(user.getEmail(), user.getFullName(), user.getRole());
+
+            String token = jwtService.generateToken(
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole()
+            );
+
             return ResponseEntity.ok(new LoginResponse(token));
-        } catch (Exception e) {
-            System.err.println("Login failure for " + req.getEmail() + ": " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
         }
     }
 }
