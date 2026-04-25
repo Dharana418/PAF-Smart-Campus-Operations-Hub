@@ -1,0 +1,8 @@
+com\campus\facilitiesapi\exception\GlobalExceptionHandler$ErrorResponse.class
+com\campus\facilitiesapi\exception\GlobalExceptionHandler.class
+com\campus\facilitiesapi\entity\Resource.class
+com\campus\facilitiesapi\FacilitiesApiApplication.class
+com\campus\facilitiesapi\config\OpenAPIConfig.class
+com\campus\facilitiesapi\repository\ResourceRepository.class
+com\campus\facilitiesapi\service\ResourceService.class
+com\campus\facilitiesapi\controller\ResourceController.class

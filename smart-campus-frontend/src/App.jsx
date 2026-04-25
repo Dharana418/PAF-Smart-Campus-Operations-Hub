@@ -16,7 +16,8 @@ import {
   CheckCircle, 
   Info, 
   AlertTriangle, 
-  XOctagon, 
+  XOctagon,
+  Calendar,
   LogOut, 
   LayoutDashboard, 
   ShieldAlert, 
@@ -41,6 +42,9 @@ import {
 import RoleManagementPage from './components/RoleManagementPage';
 import SentNotificationsPage from './components/SentNotificationsPage';
 import LandingPage from './components/LandingPage';
+import ResourceCataloguePage from './components/ResourceCataloguePage';
+import BookingManagementPage from './components/BookingManagementPage';
+import IncidentTicketingPage from './components/IncidentTicketingPage';
 
 const OAUTH_SUCCESS_PATH = '/oauth/success';
 const OAUTH_ENTRY_URL = import.meta.env.VITE_OAUTH_ENTRY_URL ?? 'http://localhost:8080/oauth2/authorization/google';
@@ -61,12 +65,15 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
 
   const [adminLogin, setAdminLogin] = useState({ email: '', password: '' });
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [isLoginViewAdmin, setIsLoginViewAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoggingIn(true);
     try {
       const response = await apiClient.post('/public/auth/dev-login', {
         email: adminLogin.email,
@@ -76,6 +83,29 @@ function App() {
       initializeApp();
     } catch (err) {
       setError('Invalid admin credentials.');
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoggingIn(true);
+
+    try {
+      const response = await apiClient.post('/public/login', {
+        email: loginForm.email,
+        password: loginForm.password
+      });
+
+      localStorage.setItem('campus_access_token', response.data.token);
+      setLoginForm({ email: '', password: '' });
+      await initializeApp();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setLoggingIn(false);
     }
   };
 
@@ -112,11 +142,38 @@ function App() {
     try {
       console.log('Starting app initialization...');
       setLoading(true);
+      
+      const token = localStorage.getItem('campus_access_token');
+      if (!token) {
+        console.log('No token found, skipping authentication.');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const meResponse = await apiClient.get('/me');
       console.log('Me response received:', meResponse.data);
       setUser(meResponse.data);
+      
       console.log('Loading secondary data...');
-      await Promise.all([loadNotifications(), loadUsersIfAdmin(meResponse.data.role)]);
+      try {
+        await Promise.all([
+          loadNotifications().catch(e => console.error('Failed to load notifications:', e)),
+          loadUsersIfAdmin(meResponse.data.role).catch(e => console.error('Failed to load users:', e))
+        ]);
+      } catch (secondaryError) {
+        console.error('Error in secondary data loading:', secondaryError);
+      }
+      
+      // Role-based landing page redirection
+      if (meResponse.data.role === 'ROLE_ADMIN') {
+        setActivePage('roles');
+      } else if (meResponse.data.role === 'ROLE_STAFF') {
+        setActivePage('sent');
+      } else {
+        setActivePage('dashboard');
+      }
+      
       console.log('Data loaded successfully.');
       setError('');
     } catch (err) {
@@ -296,10 +353,50 @@ function App() {
           </div>
 
           {!isLoginViewAdmin ? (
-            <div className="space-y-6 animate-fade-in">
-              <p className="text-gray-800 font-black text-sm leading-relaxed max-w-[300px] mx-auto">
-                Authorized personnel only. Please verify your identity using institutional Google Auth.
-              </p>
+            <div className="animate-fade-in flex flex-col gap-6">
+              <form onSubmit={handleLogin} className="text-left flex flex-col gap-5">
+                <div className="space-y-2">
+                  <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">Institutional Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="user@smartcampus.com"
+                    value={loginForm.email}
+                    onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
+                    className="premium-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] ml-1">Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={loginForm.password}
+                      onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+                      className="premium-input pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? <Lock className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" disabled={loggingIn} className="btn btn-primary w-full mt-2 group">
+                  {loggingIn ? "Verifying..." : "Access Dashboard"} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </button>
+              </form>
+
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-gray-200"></div>
+                <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">or SSO Access</span>
+                <div className="h-px flex-1 bg-gray-200"></div>
+              </div>
+
               <a className="btn btn-google w-full flex items-center justify-center gap-4 group" href={OAUTH_ENTRY_URL}>
                 <svg className="w-6 h-6 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -461,6 +558,44 @@ function App() {
               Sent Alerts
             </button>
           )}
+
+          <div className="pt-4 pb-2 px-4 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] border-t border-white/5 mt-4">Operations</div>
+          
+          <button
+            onClick={() => setActivePage('resources')}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
+              activePage === 'resources'
+                ? 'bg-emerald-600 text-white shadow-[0_8px_20px_rgba(16,185,129,0.4)]'
+                : 'hover:bg-white/5 text-gray-400 hover:text-white'
+            }`}
+          >
+            <Layout className="w-5 h-5" />
+            Resources
+          </button>
+          
+          <button
+            onClick={() => setActivePage('bookings')}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
+              activePage === 'bookings'
+                ? 'bg-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.4)]'
+                : 'hover:bg-white/5 text-gray-400 hover:text-white'
+            }`}
+          >
+            <Calendar className="w-5 h-5" />
+            Bookings
+          </button>
+          
+          <button
+            onClick={() => setActivePage('incidents')}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-black uppercase tracking-wider text-xs transition-colors ${
+              activePage === 'incidents'
+                ? 'bg-rose-600 text-white shadow-[0_8px_20px_rgba(225,29,72,0.4)]'
+                : 'hover:bg-white/5 text-gray-400 hover:text-white'
+            }`}
+          >
+            <AlertTriangle className="w-5 h-5" />
+            Incidents
+          </button>
         </nav>
 
         <div className="mt-auto pt-6 border-t border-white/5">
@@ -520,7 +655,14 @@ function App() {
                 'dharana.thilakarahena@gmail.com'
               ]}
             />
-          ) : (<>
+          ) : activePage === 'resources' ? (
+            <ResourceCataloguePage user={user} />
+          ) : activePage === 'bookings' ? (
+            <BookingManagementPage user={user} />
+          ) : activePage === 'incidents' ? (
+            <IncidentTicketingPage user={user} />
+          ) : (
+            <>
           {/* Top Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-2xl relative overflow-hidden group">
