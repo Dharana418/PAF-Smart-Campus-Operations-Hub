@@ -8,7 +8,15 @@ export default function ResourceCataloguePage({ user }) {
     const [search, setSearch] = useState('');
     const [filterType, setFilterType] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
+    const [editingResource, setEditingResource] = useState(null);
     const [newResource, setNewResource] = useState({
+        name: '',
+        type: 'Lecture Hall',
+        capacity: 50,
+        location: '',
+        status: 'ACTIVE'
+    });
+    const [editResource, setEditResource] = useState({
         name: '',
         type: 'Lecture Hall',
         capacity: 50,
@@ -53,6 +61,28 @@ export default function ResourceCataloguePage({ user }) {
             loadResources();
         } catch (err) {
             alert('Failed to delete resource');
+        }
+    };
+
+    const startEdit = (resource) => {
+        setEditingResource(resource);
+        setEditResource({
+            name: resource.name || '',
+            type: resource.type || 'Lecture Hall',
+            capacity: resource.capacity || 50,
+            location: resource.location || '',
+            status: resource.status || 'ACTIVE'
+        });
+    };
+
+    const handleUpdateResource = async (e) => {
+        e.preventDefault();
+        try {
+            await apiClient.put(`/facilities/resources/${editingResource.id}`, editResource);
+            setEditingResource(null);
+            loadResources();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update resource');
         }
     };
 
@@ -137,7 +167,14 @@ export default function ResourceCataloguePage({ user }) {
                         
                         {isAdmin && (
                             <div className="mt-8 pt-6 border-t border-gray-100 flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-colors">Edit</button>
+                                <button
+                                    type="button"
+                                    onClick={() => startEdit(resource)}
+                                    className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-colors inline-flex items-center justify-center gap-2"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                    Edit
+                                </button>
                                 <button 
                                     onClick={() => handleDelete(resource.id)}
                                     className="flex-1 py-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors"
@@ -202,6 +239,76 @@ export default function ResourceCataloguePage({ user }) {
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
                                 <button type="submit" className="flex-[2] btn btn-primary py-4 text-xs font-black uppercase tracking-widest">Register Resource</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {editingResource && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setEditingResource(null)} />
+                    <div className="bg-white rounded-[40px] w-full max-w-xl p-10 relative z-10 shadow-2xl animate-scale-in">
+                        <h3 className="text-3xl font-heading font-black text-gray-900 mb-8 uppercase tracking-tighter">Edit Resource</h3>
+                        <form onSubmit={handleUpdateResource} className="space-y-6 text-left">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Resource Name</label>
+                                <input 
+                                    className="premium-input !bg-gray-50 !text-gray-900" 
+                                    required
+                                    value={editResource.name}
+                                    onChange={e => setEditResource({ ...editResource, name: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Type</label>
+                                    <select 
+                                        className="premium-input !bg-gray-50 !text-gray-900"
+                                        value={editResource.type}
+                                        onChange={e => setEditResource({ ...editResource, type: e.target.value })}
+                                    >
+                                        <option>Lecture Hall</option>
+                                        <option>Lab</option>
+                                        <option>Meeting Room</option>
+                                        <option>Equipment</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Capacity</label>
+                                    <input 
+                                        type="number"
+                                        className="premium-input !bg-gray-50 !text-gray-900"
+                                        required
+                                        value={editResource.capacity}
+                                        onChange={e => setEditResource({ ...editResource, capacity: parseInt(e.target.value) })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Location</label>
+                                <input 
+                                    className="premium-input !bg-gray-50 !text-gray-900"
+                                    required
+                                    value={editResource.location}
+                                    onChange={e => setEditResource({ ...editResource, location: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Status</label>
+                                <select
+                                    className="premium-input !bg-gray-50 !text-gray-900"
+                                    value={editResource.status}
+                                    onChange={e => setEditResource({ ...editResource, status: e.target.value })}
+                                >
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="MAINTENANCE">MAINTENANCE</option>
+                                    <option value="INACTIVE">INACTIVE</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setEditingResource(null)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
+                                <button type="submit" className="flex-[2] btn btn-primary py-4 text-xs font-black uppercase tracking-widest">Save Changes</button>
                             </div>
                         </form>
                     </div>

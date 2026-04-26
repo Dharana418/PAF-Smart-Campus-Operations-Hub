@@ -22,16 +22,23 @@ export default function BookingManagementPage({ user }) {
     const isAdmin = user?.role === 'ROLE_ADMIN';
     const qrValue = useMemo(() => {
         if (!qrBooking) return '';
-        return JSON.stringify({
-            bookingId: qrBooking.id,
-            resourceId: qrBooking.resourceId,
-            userEmail: qrBooking.userEmail,
-            startTime: qrBooking.startTime,
-            endTime: qrBooking.endTime,
-            status: qrBooking.status,
-            generatedAt: new Date().toISOString()
-        });
-    }, [qrBooking]);
+        const resourceName = resources.find((resource) => resource.id === qrBooking.resourceId)?.name || `Resource ${qrBooking.resourceId}`;
+        const start = new Date(qrBooking.startTime);
+        const end = new Date(qrBooking.endTime);
+        const bookingDate = Number.isNaN(start.getTime()) ? 'N/A' : start.toLocaleDateString();
+        const timeWindow = Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())
+            ? 'N/A'
+            : `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+        return [
+            'SMART CAMPUS BOOKING PASS',
+            `Booking ID: ${qrBooking.id}`,
+            `Resource: ${resourceName}`,
+            `Date: ${bookingDate}`,
+            `Time: ${timeWindow}`,
+            `Status: ${qrBooking.status || 'PENDING'}`
+        ].join('\n');
+    }, [qrBooking, resources]);
 
     const safeDate = (value) => {
         const date = new Date(value);
@@ -604,10 +611,14 @@ export default function BookingManagementPage({ user }) {
                         <div className="rounded-2xl border border-gray-100 p-4 bg-white mb-6">
                             <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Booking ID</p>
                             <p className="text-sm font-black text-gray-900 break-all mt-1">{qrBooking.id}</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mt-3">Resource</p>
+                            <p className="text-sm font-black text-gray-900 mt-1">{resources.find((resource) => resource.id === qrBooking.resourceId)?.name || `Resource ${qrBooking.resourceId}`}</p>
                             <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mt-3">Time</p>
                             <p className="text-sm font-black text-gray-900 mt-1">
                                 {new Date(qrBooking.startTime).toLocaleString()} - {new Date(qrBooking.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mt-3">Status</p>
+                            <p className="text-sm font-black text-gray-900 mt-1">{qrBooking.status}</p>
                         </div>
 
                         <div className="flex gap-4">
