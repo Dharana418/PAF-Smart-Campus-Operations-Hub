@@ -162,7 +162,7 @@ public class TicketService {
         }
     }
 
-    public IncidentTicket updateTicketStatus(String id, String status, String reason, String notes) {
+    public IncidentTicket updateTicketStatus(String id, String status, String reason, String notes, String actorEmail) {
         IncidentTicket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -175,7 +175,7 @@ public class TicketService {
 
         // Notify reporter
         notificationService.createNotification(
-            "system@smartcampus.com",
+            actorEmail,
             new com.smartcampus.booking_system.dto.CreateNotificationRequest(
                 "Ticket Status Updated",
                 "Your ticket " + ticket.getId() + " is now " + status + (reason != null ? ". Reason: " + reason : ""),

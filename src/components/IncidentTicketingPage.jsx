@@ -37,7 +37,12 @@ export default function IncidentTicketingPage({ user }) {
 
     const isStaffOrAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN';
     const isTechnician = user?.role === 'ROLE_TECHNICIAN' || user?.role === 'ROLE_ADMIN';
-    const canModifySelectedTicket = !!selectedTicket && (isStaffOrAdmin || selectedTicket.reporterEmail === user?.email);
+    const isAdmin = user?.role === 'ROLE_ADMIN';
+    const canDeleteSelectedTicket = !!selectedTicket && (isStaffOrAdmin || selectedTicket.reporterEmail === user?.email);
+    const canEditSelectedTicket = !!selectedTicket && (
+        selectedTicket.reporterEmail === user?.email ||
+        (!isAdmin && (user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN'))
+    );
 
     useEffect(() => {
         loadData();
@@ -230,6 +235,10 @@ export default function IncidentTicketingPage({ user }) {
 
     const openEditTicketModal = () => {
         if (!selectedTicket) return;
+        if (!canEditSelectedTicket) {
+            showError('You are not allowed to edit this ticket.');
+            return;
+        }
         setEditTicket({
             resourceId: selectedTicket.resourceId || '',
             location: selectedTicket.location || '',
@@ -244,7 +253,14 @@ export default function IncidentTicketingPage({ user }) {
     const handleUpdateTicket = async (e) => {
         e.preventDefault();
         if (!selectedTicket) return;
-        const contactError = getContactValidationMessage(editTicket.contactDetails);
+        if (!canEditSelectedTicket) {
+            showError('You are not allowed to edit this ticket.');
+            return;
+        }
+        const originalContactDetails = (selectedTicket.contactDetails || '').trim();
+        const updatedContactDetails = (editTicket.contactDetails || '').trim();
+        const contactWasChanged = originalContactDetails !== updatedContactDetails;
+        const contactError = contactWasChanged ? getContactValidationMessage(editTicket.contactDetails) : '';
         if (contactError) {
             showError(contactError);
             return;
@@ -374,14 +390,16 @@ export default function IncidentTicketingPage({ user }) {
                                     <p className="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Category: {selectedTicket.category}</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    {canModifySelectedTicket && (
+                                    {canDeleteSelectedTicket && (
                                         <>
-                                            <button
-                                                onClick={openEditTicketModal}
-                                                className="px-4 py-2 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
+                                            {canEditSelectedTicket && (
+                                                <button
+                                                    onClick={openEditTicketModal}
+                                                    className="px-4 py-2 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={handleDeleteTicket}
                                                 className="px-4 py-2 rounded-xl border border-red-300 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors"
@@ -707,7 +725,9 @@ export default function IncidentTicketingPage({ user }) {
                                     onChange={e => setEditTicket({ ...editTicket, contactDetails: sanitizeContactDetails(e.target.value) })}
                                     inputMode={/^\d*$/.test(editTicket.contactDetails.trim()) ? 'numeric' : 'email'}
                                 />
-                                {editTicket.contactDetails.trim() && !validateContactDetails(editTicket.contactDetails) && (
+                                {editTicket.contactDetails.trim() &&
+                                    editTicket.contactDetails.trim() !== (selectedTicket?.contactDetails || '').trim() &&
+                                    !validateContactDetails(editTicket.contactDetails) && (
                                     <p className="text-[10px] font-black text-red-600 uppercase tracking-widest ml-1">
                                         {getContactValidationMessage(editTicket.contactDetails)}
                                     </p>

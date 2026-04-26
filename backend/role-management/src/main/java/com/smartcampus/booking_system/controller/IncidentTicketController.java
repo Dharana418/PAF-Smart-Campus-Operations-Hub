@@ -58,7 +58,6 @@ public class IncidentTicketController {
     @PatchMapping("/{id}")
     public IncidentTicket updateTicket(@PathVariable String id, @RequestBody Map<String, String> payload, Authentication auth) {
         boolean canManageAll = auth.getAuthorities().stream().anyMatch(a ->
-                "ROLE_ADMIN".equals(a.getAuthority()) ||
                 "ROLE_STAFF".equals(a.getAuthority()) ||
                 "ROLE_TECHNICIAN".equals(a.getAuthority())
         );
@@ -98,11 +97,11 @@ public class IncidentTicketController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
-    public IncidentTicket updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload) {
+    public IncidentTicket updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload, Authentication auth) {
         String status = payload.get("status");
         String reason = payload.get("reason");
         String notes = payload.get("notes");
-        return ticketService.updateTicketStatus(id, status, reason, notes);
+        return ticketService.updateTicketStatus(id, status, reason, notes, auth.getName());
     }
 
     @PatchMapping("/{id}/assign")
