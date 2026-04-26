@@ -18,8 +18,56 @@ export default function BookingManagementPage({ user }) {
         purpose: '',
         expectedAttendees: 1
     });
+    const [successMsg, setSuccessMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+    const [confirmCancelBookingId, setConfirmCancelBookingId] = useState(null);
 
     const isAdmin = user?.role === 'ROLE_ADMIN';
+    const nowLocalMin = useMemo(() => {
+        const d = new Date();
+        d.setSeconds(0, 0);
+        const timezoneOffsetMs = d.getTimezoneOffset() * 60000;
+        return new Date(d.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+    }, []);
+
+    const showSuccess = (message) => {
+        setSuccessMsg(message);
+        setTimeout(() => setSuccessMsg(''), 3000);
+    };
+
+    const showError = (message) => {
+        setErrorMsg(message);
+        setTimeout(() => setErrorMsg(''), 4000);
+    };
+
+    const validateBookingForm = (form) => {
+        if (!form.resourceId) return 'Please select a facility.';
+        if (!form.startTime || !form.endTime) return 'Start and end time are required.';
+
+        const start = new Date(form.startTime);
+        const end = new Date(form.endTime);
+        const now = new Date();
+
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+            return 'Please select valid start and end times.';
+        }
+        if (start < now) return 'Start time must be in the future.';
+        if (start >= end) return 'End time must be after start time.';
+
+        const durationHours = (end.getTime() - start.getTime()) / 3600000;
+        if (durationHours > 12) return 'Booking duration cannot exceed 12 hours.';
+
+        const trimmedPurpose = (form.purpose || '').trim();
+        if (!trimmedPurpose) return 'Purpose of booking is required.';
+        if (trimmedPurpose.length > 300) return 'Purpose cannot exceed 300 characters.';
+
+        const attendees = Number(form.expectedAttendees);
+        if (!Number.isInteger(attendees) || attendees < 1 || attendees > 1000) {
+            return 'Expected attendees must be between 1 and 1000.';
+        }
+
+        return '';
+    };
     const qrValue = useMemo(() => {
         if (!qrBooking) return '';
         const resourceName = resources.find((resource) => resource.id === qrBooking.resourceId)?.name || `Resource ${qrBooking.resourceId}`;
@@ -176,6 +224,12 @@ export default function BookingManagementPage({ user }) {
 
     const handleBooking = async (e) => {
         e.preventDefault();
+        const validationError = validateBookingForm(bookingForm);
+        if (validationError) {
+            showError(validationError);
+            return;
+        }
+
         try {
             const response = await apiClient.post('/bookings', bookingForm);
             setQrBooking(response.data);
@@ -189,9 +243,9 @@ export default function BookingManagementPage({ user }) {
                 expectedAttendees: 1
             });
             loadData();
-            alert('Booking request submitted successfully!');
+            showSuccess('Booking request submitted successfully!');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to submit booking');
+            showError(err.response?.data?.message || 'Failed to submit booking');
         }
     };
 
@@ -220,18 +274,21 @@ export default function BookingManagementPage({ user }) {
         try {
             await apiClient.patch(`/bookings/${id}/status`, { status, reason });
             loadData();
+            showSuccess(`Booking ${status.toLowerCase()} successfully.`);
         } catch (err) {
-            alert('Failed to update status');
+            showError(err.response?.data?.message || 'Failed to update status');
         }
     };
 
-    const cancelBooking = async (id) => {
-        if (!window.confirm('Cancel this booking?')) return;
+    const cancelBooking = async () => {
+        if (!confirmCancelBookingId) return;
         try {
-            await apiClient.post(`/bookings/${id}/cancel`);
+            await apiClient.post(`/bookings/${confirmCancelBookingId}/cancel`);
+            setConfirmCancelBookingId(null);
             loadData();
+            showSuccess('Booking cancelled successfully.');
         } catch (err) {
-            alert('Failed to cancel booking');
+            showError(err.response?.data?.message || 'Failed to cancel booking');
         }
     };
 
@@ -497,7 +554,7 @@ export default function BookingManagementPage({ user }) {
                                     )}
                                     {!isAdmin && (booking.status === 'PENDING' || booking.status === 'APPROVED') && (
                                         <button 
-                                            onClick={() => cancelBooking(booking.id)}
+                                            onClick={() => setConfirmCancelBookingId(booking.id)}
                                             className="px-6 py-3 rounded-2xl bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
                                         >
                                             Cancel Booking
@@ -545,8 +602,16 @@ export default function BookingManagementPage({ user }) {
                                         type="datetime-local"
                                         className="premium-input !bg-gray-50 !text-gray-900"
                                         required
+                                        min={nowLocalMin}
                                         value={bookingForm.startTime}
-                                        onChange={e => setBookingForm({...bookingForm, startTime: e.target.value})}
+                                        onChange={e => setBookingForm((prev) => {
+                                            const nextStart = e.target.value;
+                                            return {
+                                                ...prev,
+                                                startTime: nextStart,
+                                                endTime: prev.endTime && prev.endTime <= nextStart ? '' : prev.endTime
+                                            };
+                                        })}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -555,6 +620,8 @@ export default function BookingManagementPage({ user }) {
                                         type="datetime-local"
                                         className="premium-input !bg-gray-50 !text-gray-900"
                                         required
+                                        min={bookingForm.startTime || nowLocalMin}
+                                        disabled={!bookingForm.startTime}
                                         value={bookingForm.endTime}
                                         onChange={e => setBookingForm({...bookingForm, endTime: e.target.value})}
                                     />
@@ -576,8 +643,15 @@ export default function BookingManagementPage({ user }) {
                                 <input 
                                     type="number"
                                     className="premium-input !bg-gray-50 !text-gray-900"
+                                    min={1}
+                                    max={1000}
+                                    step={1}
+                                    required
                                     value={bookingForm.expectedAttendees}
-                                    onChange={e => setBookingForm({...bookingForm, expectedAttendees: parseInt(e.target.value)})}
+                                    onChange={e => {
+                                        const parsed = Number.parseInt(e.target.value, 10);
+                                        setBookingForm({ ...bookingForm, expectedAttendees: Number.isNaN(parsed) ? 1 : parsed });
+                                    }}
                                 />
                             </div>
                             <div className="flex gap-4 pt-4">
@@ -631,6 +705,51 @@ export default function BookingManagementPage({ user }) {
                     </div>
                 </div>
             )}
+
+            {confirmCancelBookingId && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/65 backdrop-blur-md" onClick={() => setConfirmCancelBookingId(null)} />
+                    <div className="bg-white rounded-[32px] w-full max-w-md p-8 relative z-10 shadow-2xl animate-scale-in border border-white">
+                        <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Confirm Cancellation</h3>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-8">Cancel this booking?</p>
+                        <div className="flex gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmCancelBookingId(null)}
+                                className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors"
+                            >
+                                Keep Booking
+                            </button>
+                            <button
+                                type="button"
+                                onClick={cancelBooking}
+                                className="flex-[2] py-4 rounded-2xl bg-red-600 text-white text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-colors"
+                            >
+                                Confirm Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="fixed bottom-10 right-10 z-[130] space-y-4">
+                {successMsg && (
+                    <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-green-500 shadow-2xl animate-slide-up">
+                        <div className="p-2 bg-green-500 rounded-xl">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{successMsg}</p>
+                    </div>
+                )}
+                {errorMsg && (
+                    <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-red-500 shadow-2xl animate-slide-up">
+                        <div className="p-2 bg-red-500 rounded-xl">
+                            <XCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{errorMsg}</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
