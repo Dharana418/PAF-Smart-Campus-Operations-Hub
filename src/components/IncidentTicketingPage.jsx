@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, MessageSquare, Wrench, Clock, Shield, PlusCircle, Paperclip, Send, CheckCircle } from 'lucide-react';
+import { AlertTriangle, MessageSquare, Wrench, Clock, Shield, PlusCircle, Paperclip, Send, CheckCircle, Check, XOctagon } from 'lucide-react';
 import { apiClient } from '../api/client';
 
 export default function IncidentTicketingPage({ user }) {
@@ -11,6 +11,9 @@ export default function IncidentTicketingPage({ user }) {
     const [resources, setResources] = useState([]);
     const [attachments, setAttachments] = useState([]);
     const [attachmentPreviews, setAttachmentPreviews] = useState({});
+    const [successMsg, setSuccessMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [newTicket, setNewTicket] = useState({
         resourceId: '',
         location: '',
@@ -29,6 +32,8 @@ export default function IncidentTicketingPage({ user }) {
     });
     const [commentText, setCommentText] = useState('');
     const fileInputRef = useRef(null);
+    const successTimerRef = useRef(null);
+    const errorTimerRef = useRef(null);
 
     const isStaffOrAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN';
     const isTechnician = user?.role === 'ROLE_TECHNICIAN' || user?.role === 'ROLE_ADMIN';
@@ -37,6 +42,25 @@ export default function IncidentTicketingPage({ user }) {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        return () => {
+            if (successTimerRef.current) clearTimeout(successTimerRef.current);
+            if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+        };
+    }, []);
+
+    const showSuccess = (message) => {
+        if (successTimerRef.current) clearTimeout(successTimerRef.current);
+        setSuccessMsg(message);
+        successTimerRef.current = setTimeout(() => setSuccessMsg(''), 3000);
+    };
+
+    const showError = (message) => {
+        if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+        setErrorMsg(message);
+        errorTimerRef.current = setTimeout(() => setErrorMsg(''), 3500);
+    };
 
     const getAttachmentDisplayName = (attachmentPath) => {
         if (!attachmentPath) return 'Attachment';
@@ -110,7 +134,7 @@ export default function IncidentTicketingPage({ user }) {
         const files = Array.from(e.target.files);
         const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB capacity per file
         if (valid.length !== files.length) {
-            alert('Some files were skipped because they exceed the 10MB limit.');
+            showError('Some files were skipped because they exceed the 10MB limit.');
         }
         setAttachments(prev => [...prev, ...valid].slice(0, 5)); // max 5 files total
         e.target.value = ''; // reset so same files can be re-added after removal
@@ -141,9 +165,9 @@ export default function IncidentTicketingPage({ user }) {
                 contactDetails: ''
             });
             loadData();
-            alert('Incident ticket created successfully.');
+            showSuccess('Incident ticket created successfully.');
         } catch (err) {
-            alert('Failed to create ticket');
+            showError('Failed to create ticket.');
         }
     };
 
@@ -157,7 +181,7 @@ export default function IncidentTicketingPage({ user }) {
             setTickets(updated.data);
             setSelectedTicket(updated.data.find(t => t.id === selectedTicket.id));
         } catch (err) {
-            alert('Failed to add comment');
+            showError('Failed to add comment.');
         }
     };
 
@@ -167,8 +191,9 @@ export default function IncidentTicketingPage({ user }) {
             loadData();
             setShowNewModal(false);
             setSelectedTicket(null);
+            showSuccess('Ticket status updated.');
         } catch (err) {
-            alert('Failed to update status');
+            showError('Failed to update status.');
         }
     };
 
@@ -196,23 +221,27 @@ export default function IncidentTicketingPage({ user }) {
             const updatedTicket = refreshed.data.find(t => t.id === selectedTicket.id);
             setTickets(refreshed.data);
             setSelectedTicket(updatedTicket || null);
-            alert('Ticket updated successfully.');
+            showSuccess('Ticket updated successfully.');
         } catch (err) {
-            alert('Failed to update ticket');
+            showError('Failed to update ticket.');
         }
     };
 
     const handleDeleteTicket = async () => {
         if (!selectedTicket) return;
-        const ok = window.confirm('Delete this ticket permanently? This action cannot be undone.');
-        if (!ok) return;
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDeleteTicket = async () => {
+        if (!selectedTicket) return;
         try {
             await apiClient.delete(`/tickets/${selectedTicket.id}`);
             setSelectedTicket(null);
+            setShowDeleteConfirm(false);
             await loadData();
-            alert('Ticket deleted successfully.');
+            showSuccess('Ticket deleted successfully.');
         } catch (err) {
-            alert('Failed to delete ticket');
+            showError('Failed to delete ticket.');
         }
     };
 
@@ -656,6 +685,53 @@ export default function IncidentTicketingPage({ user }) {
                     </div>
                 </div>
             )}
+
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowDeleteConfirm(false)} />
+                    <div className="bg-white rounded-[32px] w-full max-w-md p-8 relative z-10 shadow-2xl animate-scale-in">
+                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Delete Ticket?</h3>
+                        <p className="mt-3 text-xs font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                            Are you sure you want to permanently remove this ticket? This action cannot be undone.
+                        </p>
+                        <div className="mt-8 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="flex-1 py-3 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDeleteTicket}
+                                className="flex-1 py-3 rounded-xl border border-red-300 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="fixed bottom-10 right-10 z-[120] space-y-4">
+                {successMsg && (
+                    <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-green-500 shadow-2xl animate-slide-up">
+                        <div className="p-2 bg-green-500 rounded-xl">
+                            <Check className="w-5 h-5 text-white" />
+                        </div>
+                        <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{successMsg}</p>
+                    </div>
+                )}
+                {errorMsg && (
+                    <div className="flex items-center gap-4 p-5 rounded-[24px] bg-white border-2 border-red-500 shadow-2xl animate-slide-up">
+                        <div className="p-2 bg-red-500 rounded-xl">
+                            <XOctagon className="w-5 h-5 text-white" />
+                        </div>
+                        <p className="text-gray-900 font-black text-xs uppercase tracking-widest">{errorMsg}</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
