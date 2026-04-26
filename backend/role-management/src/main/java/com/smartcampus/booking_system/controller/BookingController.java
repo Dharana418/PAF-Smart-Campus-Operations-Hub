@@ -34,7 +34,7 @@ public class BookingController {
         try {
             booking.setUserEmail(auth.getName());
             return ResponseEntity.ok(bookingService.requestBooking(booking));
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
@@ -54,8 +54,14 @@ public class BookingController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelBooking(@PathVariable String id, Authentication auth) {
-        bookingService.cancelBooking(id, auth.getName());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> cancelBooking(@PathVariable String id, Authentication auth) {
+        try {
+            bookingService.cancelBooking(id, auth.getName());
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

@@ -18,6 +18,9 @@ import java.util.Set;
 public class BookingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookingService.class);
     private static final Set<String> ALLOWED_STATUSES = Set.of("PENDING", "APPROVED", "REJECTED", "CANCELLED");
+    private static final int MAX_PURPOSE_LENGTH = 300;
+    private static final int MAX_EXPECTED_ATTENDEES = 1000;
+    private static final long MAX_BOOKING_HOURS = 12;
 
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
@@ -36,9 +39,20 @@ public class BookingService {
     }
 
     public Booking requestBooking(Booking booking) {
+        if (booking == null) {
+            throw new IllegalArgumentException("Booking payload is required");
+        }
+
         if (booking.getResourceId() == null || booking.getResourceId().isBlank()) {
             throw new IllegalArgumentException("Resource is required");
         }
+
+        if (booking.getUserEmail() == null || booking.getUserEmail().isBlank()) {
+            throw new IllegalArgumentException("User email is required");
+        }
+
+        validatePurpose(booking.getPurpose());
+        validateExpectedAttendees(booking.getExpectedAttendees());
 
         validateBookingTimeRange(booking.getStartTime(), booking.getEndTime());
 
@@ -47,6 +61,9 @@ public class BookingService {
         }
 
         booking.setStatus("PENDING");
+        booking.setPurpose(booking.getPurpose().trim());
+        booking.setResourceId(booking.getResourceId().trim());
+        booking.setUserEmail(booking.getUserEmail().trim().toLowerCase(Locale.ROOT));
         booking.setCreatedAt(LocalDateTime.now());
         booking.setUpdatedAt(LocalDateTime.now());
         return bookingRepository.save(booking);
@@ -65,6 +82,20 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Booking not found"));
 
+        if ("CANCELLED".equals(normalizeStatus(booking.getStatus()))) {
+            throw new IllegalArgumentException("Cancelled bookings cannot be updated");
+        }
+
+        if ("REJECTED".equals(normalizeStatus(booking.getStatus())) && "APPROVED".equals(normalizedStatus)) {
+            throw new IllegalArgumentException("Rejected bookings cannot be approved");
+        }
+
+        if ("REJECTED".equals(normalizedStatus)) {
+            if (reason == null || reason.trim().length() < 3) {
+                throw new IllegalArgumentException("A rejection reason with at least 3 characters is required");
+            }
+        }
+
         if ("APPROVED".equals(normalizedStatus)) {
             validateBookingTimeRange(booking.getStartTime(), booking.getEndTime());
             if (hasConflictingBooking(booking.getResourceId(), booking.getStartTime(), booking.getEndTime(), booking.getId(), List.of("APPROVED"))) {
@@ -73,9 +104,7 @@ public class BookingService {
         }
 
         booking.setStatus(normalizedStatus);
-        if (reason != null) {
-            booking.setRejectionReason(reason.trim().isEmpty() ? null : reason.trim());
-        }
+        booking.setRejectionReason(reason == null || reason.trim().isEmpty() ? null : reason.trim());
         booking.setUpdatedAt(LocalDateTime.now());
         
         Booking saved = bookingRepository.save(booking);
@@ -101,13 +130,23 @@ public class BookingService {
 
     public void cancelBooking(String id, String userEmail) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new NoSuchElementException("Booking not found"));
         
-        if (!booking.getUserEmail().equals(userEmail)) {
-            throw new RuntimeException("Unauthorized to cancel this booking");
+        if (userEmail == null || userEmail.isBlank() || !booking.getUserEmail().equalsIgnoreCase(userEmail)) {
+            throw new IllegalArgumentException("Unauthorized to cancel this booking");
+        }
+
+        String normalizedStatus = normalizeStatus(booking.getStatus());
+        if (!("PENDING".equals(normalizedStatus) || "APPROVED".equals(normalizedStatus))) {
+            throw new IllegalArgumentException("Only pending or approved bookings can be cancelled");
+        }
+
+        if (booking.getEndTime() != null && booking.getEndTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Past bookings cannot be cancelled");
         }
 
         booking.setStatus("CANCELLED");
+        booking.setRejectionReason(null);
         booking.setUpdatedAt(LocalDateTime.now());
         bookingRepository.save(booking);
     }
@@ -118,6 +157,35 @@ public class BookingService {
         }
         if (!startTime.isBefore(endTime)) {
             throw new IllegalArgumentException("Start time must be before end time");
+        }
+        if (startTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Start time must be in the future");
+        }
+
+        long bookingHours = java.time.Duration.between(startTime, endTime).toHours();
+        if (bookingHours > MAX_BOOKING_HOURS) {
+            throw new IllegalArgumentException("Booking duration cannot exceed " + MAX_BOOKING_HOURS + " hours");
+        }
+    }
+
+    private void validatePurpose(String purpose) {
+        if (purpose == null || purpose.trim().isEmpty()) {
+            throw new IllegalArgumentException("Purpose is required");
+        }
+        if (purpose.trim().length() > MAX_PURPOSE_LENGTH) {
+            throw new IllegalArgumentException("Purpose cannot exceed " + MAX_PURPOSE_LENGTH + " characters");
+        }
+    }
+
+    private void validateExpectedAttendees(Integer expectedAttendees) {
+        if (expectedAttendees == null) {
+            throw new IllegalArgumentException("Expected attendees is required");
+        }
+        if (expectedAttendees < 1) {
+            throw new IllegalArgumentException("Expected attendees must be at least 1");
+        }
+        if (expectedAttendees > MAX_EXPECTED_ATTENDEES) {
+            throw new IllegalArgumentException("Expected attendees cannot exceed " + MAX_EXPECTED_ATTENDEES);
         }
     }
 
