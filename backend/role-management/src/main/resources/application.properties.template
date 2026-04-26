@@ -1,10 +1,11 @@
 spring.application.name=booking-system
 
-server.port=8080
+server.port=8081
 
 # ─── Google OAuth2 ────────────────────────────────────────────────────────────
 spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
 spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8081/login/oauth2/code/google
 spring.security.oauth2.client.registration.google.scope=openid,profile,email
 
 # ─── JWT & Security ───────────────────────────────────────────────────────────
@@ -20,4 +21,4 @@ app.seed.admin-name=Admin
 app.seed.admin-password=REPLACE_WITH_STRONG_PASSWORD
 
 # ─── MongoDB ──────────────────────────────────────────────────────────────────
-spring.mongodb.uri=mongodb://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_CLUSTER/YOUR_DB?authSource=admin&retryWrites=true&w=majority&ssl=true&directConnection=true
+spring.data.mongodb.uri=mongodb://localhost:27017/booking_system

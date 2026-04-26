@@ -22,13 +22,13 @@ This repository is organized into a frontend-first monorepo structure:
 ## Running the Project
 
 ### 1. Backend Services
-Navigate to the core API module and run with Maven:
+Navigate to the role-management backend module and run with Maven:
 
 ```powershell
-cd backend/core-api
+cd backend/role-management
 ./mvnw spring-boot:run
 ```
-*Default URL: `http://localhost:8080`*
+*Default URL: `http://localhost:8081`*
 
 ### 2. Frontend Application
 Install dependencies and start the Vite dev server from the root directory:
@@ -42,16 +42,21 @@ npm run dev
 ## Environment Configuration
 
 ### Backend OAuth Setup
-Update `backend/core-api/src/main/resources/application.properties` with your Google credentials:
+Update `backend/role-management/src/main/resources/application.properties` with your Google credentials:
 - `spring.security.oauth2.client.registration.google.client-id`
 - `spring.security.oauth2.client.registration.google.client-secret`
 
-Authorized Redirect URI: `http://localhost:8080/login/oauth2/code/google`
+Google Console settings for this backend:
+- Authorized JavaScript origins: `http://localhost:5173` and `http://localhost:8081`
+- Authorized redirect URIs: `http://localhost:8081/login/oauth2/code/google`
+
+Optional local redirect for browser-based testing:
+- `http://127.0.0.1:8081/login/oauth2/code/google`
 
 ### Frontend Environment
 Optional configuration in a root `.env` file:
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_OAUTH_ENTRY_URL=http://localhost:8080/oauth2/authorization/google
+VITE_API_BASE_URL=http://localhost:8081/api
+VITE_OAUTH_ENTRY_URL=http://localhost:8081/oauth2/authorization/google
 ```
 
