@@ -228,6 +228,12 @@ export default function BookingManagementPage({ user }) {
         }
     };
 
+    const openQrForBooking = (booking) => {
+        setSelectedBookingId(booking.id);
+        setQrBooking(booking);
+        setShowQrModal(true);
+    };
+
     const getStatusColor = (status) => {
         switch(status) {
             case 'APPROVED': return 'bg-green-500';
@@ -457,6 +463,13 @@ export default function BookingManagementPage({ user }) {
                                 </span>
                                 
                                 <div className="flex items-center gap-3 mt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => openQrForBooking(booking)}
+                                        className="px-6 py-3 rounded-2xl bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all"
+                                    >
+                                        View QR
+                                    </button>
                                     {isAdmin && booking.status === 'PENDING' && (
                                         <>
                                             <button 
