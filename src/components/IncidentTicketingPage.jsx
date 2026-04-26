@@ -210,7 +210,7 @@ export default function IncidentTicketingPage({ user }) {
                                         <div className="mt-6 flex flex-wrap gap-3">
                                             {selectedTicket.imageAttachments.map((img, i) => (
                                                 <div key={i} className="w-20 h-20 rounded-xl bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-400">
-                                                    <Paperclip className="w-6 h-6" />
+                                                    <Paperclip className="w-7 h-7" />
                                                 </div>
                                             ))}
                                         </div>
