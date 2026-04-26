@@ -50,7 +50,7 @@ export default function IncidentTicketingPage({ user }) {
             alert('Some files were skipped because they exceed the 10MB limit.');
         }
         setAttachments(prev => [...prev, ...valid].slice(0, 5)); // max 5 files total
-        e.target.value = ''; // reset so same file can be re-added after removal
+        e.target.value = ''; // reset so same files can be re-added after removal
     };
 
     const removeAttachment = (index) => {
