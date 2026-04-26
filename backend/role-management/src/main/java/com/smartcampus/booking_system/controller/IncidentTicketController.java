@@ -3,10 +3,12 @@ package com.smartcampus.booking_system.controller;
 import com.smartcampus.booking_system.model.IncidentTicket;
 import com.smartcampus.booking_system.service.TicketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +33,31 @@ public class IncidentTicketController {
         return ticketService.getTicketsByReporter(auth.getName());
     }
 
-    @PostMapping
-    public IncidentTicket createTicket(@RequestBody IncidentTicket ticket, Authentication auth) {
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public IncidentTicket createTicket(
+            @RequestParam(required = false) String resourceId,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String contactDetails,
+            @RequestParam(value = "attachments", required = false) List<MultipartFile> attachments,
+            Authentication auth) {
+        IncidentTicket ticket = new IncidentTicket();
+        ticket.setResourceId(resourceId);
+        ticket.setLocation(location);
+        ticket.setCategory(category);
+        ticket.setDescription(description);
+        ticket.setPriority(priority != null ? priority : "MEDIUM");
+        ticket.setContactDetails(contactDetails);
         ticket.setReporterEmail(auth.getName());
+        if (attachments != null) {
+            List<String> fileNames = attachments.stream()
+                    .filter(f -> f != null && !f.isEmpty())
+                    .map(MultipartFile::getOriginalFilename)
+                    .collect(java.util.stream.Collectors.toList());
+            ticket.setImageAttachments(fileNames);
+        }
         return ticketService.createTicket(ticket);
     }
 
