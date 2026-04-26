@@ -37,7 +37,12 @@ export default function IncidentTicketingPage({ user }) {
 
     const isStaffOrAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN';
     const isTechnician = user?.role === 'ROLE_TECHNICIAN' || user?.role === 'ROLE_ADMIN';
-    const canModifySelectedTicket = !!selectedTicket && (isStaffOrAdmin || selectedTicket.reporterEmail === user?.email);
+    const isAdmin = user?.role === 'ROLE_ADMIN';
+    const canDeleteSelectedTicket = !!selectedTicket && (isStaffOrAdmin || selectedTicket.reporterEmail === user?.email);
+    const canEditSelectedTicket = !!selectedTicket && (
+        selectedTicket.reporterEmail === user?.email ||
+        (!isAdmin && (user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN'))
+    );
 
     useEffect(() => {
         loadData();
@@ -144,8 +149,39 @@ export default function IncidentTicketingPage({ user }) {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 
+    const sanitizeContactDetails = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return '';
+        if (/^\d*$/.test(trimmed)) return trimmed.slice(0, 10);
+        return value;
+    };
+
+    const validateContactDetails = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return true;
+        if (/^\d+$/.test(trimmed)) return /^\d{10}$/.test(trimmed);
+        return trimmed.includes('@');
+    };
+
+    const getContactValidationMessage = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return '';
+        if (/^\d+$/.test(trimmed) && !/^\d{10}$/.test(trimmed)) {
+            return 'Mobile number must be exactly 10 digits.';
+        }
+        if (!/^\d+$/.test(trimmed) && !trimmed.includes('@')) {
+            return 'Email must contain @.';
+        }
+        return '';
+    };
+
     const handleCreateTicket = async (e) => {
         e.preventDefault();
+        const contactError = getContactValidationMessage(newTicket.contactDetails);
+        if (contactError) {
+            showError(contactError);
+            return;
+        }
         try {
             const formData = new FormData();
             Object.entries(newTicket).forEach(([k, v]) => formData.append(k, v));
@@ -199,6 +235,10 @@ export default function IncidentTicketingPage({ user }) {
 
     const openEditTicketModal = () => {
         if (!selectedTicket) return;
+        if (!canEditSelectedTicket) {
+            showError('You are not allowed to edit this ticket.');
+            return;
+        }
         setEditTicket({
             resourceId: selectedTicket.resourceId || '',
             location: selectedTicket.location || '',
@@ -213,6 +253,18 @@ export default function IncidentTicketingPage({ user }) {
     const handleUpdateTicket = async (e) => {
         e.preventDefault();
         if (!selectedTicket) return;
+        if (!canEditSelectedTicket) {
+            showError('You are not allowed to edit this ticket.');
+            return;
+        }
+        const originalContactDetails = (selectedTicket.contactDetails || '').trim();
+        const updatedContactDetails = (editTicket.contactDetails || '').trim();
+        const contactWasChanged = originalContactDetails !== updatedContactDetails;
+        const contactError = contactWasChanged ? getContactValidationMessage(editTicket.contactDetails) : '';
+        if (contactError) {
+            showError(contactError);
+            return;
+        }
         try {
             await apiClient.patch(`/tickets/${selectedTicket.id}`, editTicket);
             setShowEditModal(false);
@@ -338,14 +390,16 @@ export default function IncidentTicketingPage({ user }) {
                                     <p className="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Category: {selectedTicket.category}</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    {canModifySelectedTicket && (
+                                    {canDeleteSelectedTicket && (
                                         <>
-                                            <button
-                                                onClick={openEditTicketModal}
-                                                className="px-4 py-2 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
+                                            {canEditSelectedTicket && (
+                                                <button
+                                                    onClick={openEditTicketModal}
+                                                    className="px-4 py-2 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={handleDeleteTicket}
                                                 className="px-4 py-2 rounded-xl border border-red-300 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors"
@@ -577,8 +631,14 @@ export default function IncidentTicketingPage({ user }) {
                                     className="premium-input !bg-gray-50 !text-gray-900"
                                     placeholder="Phone number or alternate email..."
                                     value={newTicket.contactDetails}
-                                    onChange={e => setNewTicket({ ...newTicket, contactDetails: e.target.value })}
+                                    onChange={e => setNewTicket({ ...newTicket, contactDetails: sanitizeContactDetails(e.target.value) })}
+                                    inputMode={/^\d*$/.test(newTicket.contactDetails.trim()) ? 'numeric' : 'email'}
                                 />
+                                {newTicket.contactDetails.trim() && !validateContactDetails(newTicket.contactDetails) && (
+                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-widest ml-1">
+                                        {getContactValidationMessage(newTicket.contactDetails)}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-4 pt-4">
@@ -662,8 +722,16 @@ export default function IncidentTicketingPage({ user }) {
                                 <input
                                     className="premium-input !bg-gray-50 !text-gray-900"
                                     value={editTicket.contactDetails}
-                                    onChange={e => setEditTicket({ ...editTicket, contactDetails: e.target.value })}
+                                    onChange={e => setEditTicket({ ...editTicket, contactDetails: sanitizeContactDetails(e.target.value) })}
+                                    inputMode={/^\d*$/.test(editTicket.contactDetails.trim()) ? 'numeric' : 'email'}
                                 />
+                                {editTicket.contactDetails.trim() &&
+                                    editTicket.contactDetails.trim() !== (selectedTicket?.contactDetails || '').trim() &&
+                                    !validateContactDetails(editTicket.contactDetails) && (
+                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-widest ml-1">
+                                        {getContactValidationMessage(editTicket.contactDetails)}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-4 pt-4">
