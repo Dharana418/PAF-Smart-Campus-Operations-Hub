@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Clock, Users, CheckCircle, XCircle, AlertCircle, Send, BarChart3, Activity, Layers, Timer, Eye, Download } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, XCircle, AlertCircle, Send, BarChart3, Activity, Layers, Timer, Eye, Download, Trash2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { apiClient } from '../api/client';
 
@@ -21,6 +21,7 @@ export default function BookingManagementPage({ user }) {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [confirmCancelBookingId, setConfirmCancelBookingId] = useState(null);
+    const [confirmDeleteBookingId, setConfirmDeleteBookingId] = useState(null);
 
     const isAdmin = user?.role === 'ROLE_ADMIN';
     const nowLocalMin = useMemo(() => {
@@ -298,6 +299,30 @@ export default function BookingManagementPage({ user }) {
         setShowQrModal(true);
     };
 
+    const canDeleteBooking = (booking) => {
+        if (isAdmin) return true;
+        return booking.status === 'CANCELLED' || booking.status === 'REJECTED';
+    };
+
+    const deleteBooking = async () => {
+        if (!confirmDeleteBookingId) return;
+        try {
+            await apiClient.delete(`/bookings/${confirmDeleteBookingId}`);
+            if (selectedBookingId === confirmDeleteBookingId) {
+                setSelectedBookingId(null);
+            }
+            if (qrBooking?.id === confirmDeleteBookingId) {
+                setShowQrModal(false);
+                setQrBooking(null);
+            }
+            setConfirmDeleteBookingId(null);
+            loadData();
+            showSuccess('Booking deleted successfully.');
+        } catch (err) {
+            showError(err.response?.data?.message || 'Failed to delete booking');
+        }
+    };
+
     const getStatusColor = (status) => {
         switch(status) {
             case 'APPROVED': return 'bg-green-500';
@@ -560,6 +585,16 @@ export default function BookingManagementPage({ user }) {
                                             Cancel Booking
                                         </button>
                                     )}
+                                    {canDeleteBooking(booking) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setConfirmDeleteBookingId(booking.id)}
+                                            className="p-3 rounded-2xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                            title="Delete Booking"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    )}
                                 </div>
                                 {booking.rejectionReason && (
                                     <p className="text-red-500 text-[10px] font-black uppercase tracking-wider text-right">Reason: {booking.rejectionReason}</p>
@@ -726,6 +761,32 @@ export default function BookingManagementPage({ user }) {
                                 className="flex-[2] py-4 rounded-2xl bg-red-600 text-white text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-colors"
                             >
                                 Confirm Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {confirmDeleteBookingId && (
+                <div className="fixed inset-0 z-[121] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/65 backdrop-blur-md" onClick={() => setConfirmDeleteBookingId(null)} />
+                    <div className="bg-white rounded-[32px] w-full max-w-md p-8 relative z-10 shadow-2xl animate-scale-in border border-white">
+                        <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Confirm Deletion</h3>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-8">Delete this booking permanently?</p>
+                        <div className="flex gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmDeleteBookingId(null)}
+                                className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors"
+                            >
+                                Keep Booking
+                            </button>
+                            <button
+                                type="button"
+                                onClick={deleteBooking}
+                                className="flex-[2] py-4 rounded-2xl bg-red-600 text-white text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-colors"
+                            >
+                                Confirm Delete
                             </button>
                         </div>
                     </div>
