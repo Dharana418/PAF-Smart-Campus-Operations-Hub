@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -40,10 +41,16 @@ public class BookingController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public Booking updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload) {
-        String status = payload.get("status");
-        String reason = payload.get("reason");
-        return bookingService.updateBookingStatus(id, status, reason);
+    public ResponseEntity<?> updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload) {
+        try {
+            String status = payload.get("status");
+            String reason = payload.get("reason");
+            return ResponseEntity.ok(bookingService.updateBookingStatus(id, status, reason));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/{id}/cancel")
