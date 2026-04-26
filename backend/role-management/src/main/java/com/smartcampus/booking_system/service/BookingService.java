@@ -129,10 +129,19 @@ public class BookingService {
     }
 
     public void cancelBooking(String id, String userEmail) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Booking id is required");
+        }
+
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Booking not found"));
+
+        String bookingOwnerEmail = booking.getUserEmail();
+        if (bookingOwnerEmail == null || bookingOwnerEmail.isBlank()) {
+            throw new IllegalArgumentException("Booking owner information is missing");
+        }
         
-        if (userEmail == null || userEmail.isBlank() || !booking.getUserEmail().equalsIgnoreCase(userEmail)) {
+        if (userEmail == null || userEmail.isBlank() || !bookingOwnerEmail.equalsIgnoreCase(userEmail)) {
             throw new IllegalArgumentException("Unauthorized to cancel this booking");
         }
 
@@ -149,6 +158,34 @@ public class BookingService {
         booking.setRejectionReason(null);
         booking.setUpdatedAt(LocalDateTime.now());
         bookingRepository.save(booking);
+    }
+
+    public void deleteBooking(String id, String requesterEmail, boolean isAdmin) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Booking id is required");
+        }
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Booking not found"));
+
+        String bookingOwnerEmail = booking.getUserEmail();
+
+        if (!isAdmin) {
+            if (bookingOwnerEmail == null || bookingOwnerEmail.isBlank()) {
+                throw new IllegalArgumentException("Booking owner information is missing");
+            }
+
+            if (requesterEmail == null || requesterEmail.isBlank() || !bookingOwnerEmail.equalsIgnoreCase(requesterEmail)) {
+                throw new IllegalArgumentException("Unauthorized to delete this booking");
+            }
+
+            String normalizedStatus = normalizeStatus(booking.getStatus());
+            if (!("CANCELLED".equals(normalizedStatus) || "REJECTED".equals(normalizedStatus))) {
+                throw new IllegalArgumentException("Only cancelled or rejected bookings can be deleted");
+            }
+        }
+
+        bookingRepository.deleteById(id);
     }
 
     private void validateBookingTimeRange(LocalDateTime startTime, LocalDateTime endTime) {

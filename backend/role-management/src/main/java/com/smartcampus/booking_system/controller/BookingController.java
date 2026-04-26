@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,6 +63,27 @@ public class BookingController {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBooking(@PathVariable String id, Authentication auth) {
+        try {
+            if (auth == null || auth.getName() == null || auth.getName().isBlank()) {
+                return ResponseEntity.status(401).body(Map.of("message", "Authentication is required"));
+            }
+
+            boolean isAdmin = auth.getAuthorities() != null && auth.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .anyMatch("ROLE_ADMIN"::equals);
+            bookingService.deleteBooking(id, auth.getName(), isAdmin);
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Delete failed due to an internal error"));
         }
     }
 }
