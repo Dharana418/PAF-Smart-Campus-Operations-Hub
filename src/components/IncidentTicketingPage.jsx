@@ -45,7 +45,7 @@ export default function IncidentTicketingPage({ user }) {
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB cap per file
+        const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB capacity per file
         if (valid.length !== files.length) {
             alert('Some files were skipped because they exceed the 10MB limit.');
         }
