@@ -45,12 +45,12 @@ export default function IncidentTicketingPage({ user }) {
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB cap per file
+        const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB capacity per file
         if (valid.length !== files.length) {
             alert('Some files were skipped because they exceed the 10MB limit.');
         }
         setAttachments(prev => [...prev, ...valid].slice(0, 5)); // max 5 files total
-        e.target.value = ''; // reset so same file can be re-added after removal
+        e.target.value = ''; // reset so same files can be re-added after removal
     };
 
     const removeAttachment = (index) => {
@@ -210,7 +210,7 @@ export default function IncidentTicketingPage({ user }) {
                                         <div className="mt-6 flex flex-wrap gap-3">
                                             {selectedTicket.imageAttachments.map((img, i) => (
                                                 <div key={i} className="w-20 h-20 rounded-xl bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-400">
-                                                    <Paperclip className="w-6 h-6" />
+                                                    <Paperclip className="w-7 h-7" />
                                                 </div>
                                             ))}
                                         </div>
