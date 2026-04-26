@@ -144,8 +144,39 @@ export default function IncidentTicketingPage({ user }) {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 
+    const sanitizeContactDetails = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return '';
+        if (/^\d*$/.test(trimmed)) return trimmed.slice(0, 10);
+        return value;
+    };
+
+    const validateContactDetails = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return true;
+        if (/^\d+$/.test(trimmed)) return /^\d{10}$/.test(trimmed);
+        return trimmed.includes('@');
+    };
+
+    const getContactValidationMessage = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return '';
+        if (/^\d+$/.test(trimmed) && !/^\d{10}$/.test(trimmed)) {
+            return 'Mobile number must be exactly 10 digits.';
+        }
+        if (!/^\d+$/.test(trimmed) && !trimmed.includes('@')) {
+            return 'Email must contain @.';
+        }
+        return '';
+    };
+
     const handleCreateTicket = async (e) => {
         e.preventDefault();
+        const contactError = getContactValidationMessage(newTicket.contactDetails);
+        if (contactError) {
+            showError(contactError);
+            return;
+        }
         try {
             const formData = new FormData();
             Object.entries(newTicket).forEach(([k, v]) => formData.append(k, v));
@@ -213,6 +244,11 @@ export default function IncidentTicketingPage({ user }) {
     const handleUpdateTicket = async (e) => {
         e.preventDefault();
         if (!selectedTicket) return;
+        const contactError = getContactValidationMessage(editTicket.contactDetails);
+        if (contactError) {
+            showError(contactError);
+            return;
+        }
         try {
             await apiClient.patch(`/tickets/${selectedTicket.id}`, editTicket);
             setShowEditModal(false);
@@ -577,8 +613,14 @@ export default function IncidentTicketingPage({ user }) {
                                     className="premium-input !bg-gray-50 !text-gray-900"
                                     placeholder="Phone number or alternate email..."
                                     value={newTicket.contactDetails}
-                                    onChange={e => setNewTicket({ ...newTicket, contactDetails: e.target.value })}
+                                    onChange={e => setNewTicket({ ...newTicket, contactDetails: sanitizeContactDetails(e.target.value) })}
+                                    inputMode={/^\d*$/.test(newTicket.contactDetails.trim()) ? 'numeric' : 'email'}
                                 />
+                                {newTicket.contactDetails.trim() && !validateContactDetails(newTicket.contactDetails) && (
+                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-widest ml-1">
+                                        {getContactValidationMessage(newTicket.contactDetails)}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-4 pt-4">
@@ -662,8 +704,14 @@ export default function IncidentTicketingPage({ user }) {
                                 <input
                                     className="premium-input !bg-gray-50 !text-gray-900"
                                     value={editTicket.contactDetails}
-                                    onChange={e => setEditTicket({ ...editTicket, contactDetails: e.target.value })}
+                                    onChange={e => setEditTicket({ ...editTicket, contactDetails: sanitizeContactDetails(e.target.value) })}
+                                    inputMode={/^\d*$/.test(editTicket.contactDetails.trim()) ? 'numeric' : 'email'}
                                 />
+                                {editTicket.contactDetails.trim() && !validateContactDetails(editTicket.contactDetails) && (
+                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-widest ml-1">
+                                        {getContactValidationMessage(editTicket.contactDetails)}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-4 pt-4">
