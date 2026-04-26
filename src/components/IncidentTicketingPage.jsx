@@ -104,7 +104,7 @@ export default function IncidentTicketingPage({ user }) {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {/* Tickets List */}
+                {/* Tickets List view */}
                 <div className="xl:col-span-1 space-y-4">
                     {loading ? (
                         <div className="py-10 text-center text-gray-500 font-black">Loading tickets...</div>
