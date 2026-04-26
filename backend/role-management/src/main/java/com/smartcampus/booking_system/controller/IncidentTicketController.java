@@ -2,7 +2,8 @@ package com.smartcampus.booking_system.controller;
 
 import com.smartcampus.booking_system.model.IncidentTicket;
 import com.smartcampus.booking_system.service.TicketService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,14 +52,15 @@ public class IncidentTicketController {
         ticket.setPriority(priority != null ? priority : "MEDIUM");
         ticket.setContactDetails(contactDetails);
         ticket.setReporterEmail(auth.getName());
-        if (attachments != null) {
-            List<String> fileNames = attachments.stream()
-                    .filter(f -> f != null && !f.isEmpty())
-                    .map(MultipartFile::getOriginalFilename)
-                    .collect(java.util.stream.Collectors.toList());
-            ticket.setImageAttachments(fileNames);
-        }
-        return ticketService.createTicket(ticket);
+        return ticketService.createTicket(ticket, attachments);
+    }
+
+    @GetMapping("/attachments/{filename:.+}")
+    public ResponseEntity<Resource> getAttachment(@PathVariable String filename) {
+        Resource resource = ticketService.loadAttachmentAsResource(filename);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 
     @PatchMapping("/{id}/status")

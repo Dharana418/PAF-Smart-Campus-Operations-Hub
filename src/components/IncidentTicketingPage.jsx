@@ -9,6 +9,7 @@ export default function IncidentTicketingPage({ user }) {
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [resources, setResources] = useState([]);
     const [attachments, setAttachments] = useState([]);
+    const [attachmentPreviews, setAttachmentPreviews] = useState({});
     const [newTicket, setNewTicket] = useState({
         resourceId: '',
         location: '',
@@ -26,6 +27,58 @@ export default function IncidentTicketingPage({ user }) {
     useEffect(() => {
         loadData();
     }, []);
+
+    const getAttachmentDisplayName = (attachmentPath) => {
+        if (!attachmentPath) return 'Attachment';
+        const raw = attachmentPath.split('/').pop() || attachmentPath;
+        const parts = raw.split('_');
+        return parts.length > 1 ? parts.slice(1).join('_') : raw;
+    };
+
+    useEffect(() => {
+        let isActive = true;
+        const objectUrls = [];
+
+        const loadAttachmentPreviews = async () => {
+            const list = selectedTicket?.imageAttachments || [];
+            if (!list.length) {
+                setAttachmentPreviews({});
+                return;
+            }
+
+            const entries = await Promise.all(
+                list.map(async (attachmentPath) => {
+                    const name = getAttachmentDisplayName(attachmentPath);
+
+                    if (attachmentPath?.startsWith('/api/')) {
+                        try {
+                            const normalizedPath = attachmentPath.replace(/^\/api/, '');
+                            const response = await apiClient.get(normalizedPath, { responseType: 'blob' });
+                            const blob = response.data;
+                            const objectUrl = URL.createObjectURL(blob);
+                            objectUrls.push(objectUrl);
+                            return [attachmentPath, { name, url: objectUrl, type: blob.type || '' }];
+                        } catch (error) {
+                            return [attachmentPath, { name, url: null, type: '' }];
+                        }
+                    }
+
+                    return [attachmentPath, { name, url: attachmentPath, type: '' }];
+                })
+            );
+
+            if (isActive) {
+                setAttachmentPreviews(Object.fromEntries(entries));
+            }
+        };
+
+        loadAttachmentPreviews();
+
+        return () => {
+            isActive = false;
+            objectUrls.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [selectedTicket]);
 
     const loadData = async () => {
         try {
@@ -124,6 +177,16 @@ export default function IncidentTicketingPage({ user }) {
         return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
     };
 
+    const isImageFile = (name, mimeType) => {
+        if (mimeType?.startsWith('image/')) return true;
+        return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(name || '');
+    };
+
+    const isPdfFile = (name, mimeType) => {
+        if (mimeType === 'application/pdf') return true;
+        return /\.pdf$/i.test(name || '');
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -207,12 +270,48 @@ export default function IncidentTicketingPage({ user }) {
                                     <p className="text-[10px] font-black text-accent-1 uppercase tracking-widest mb-3">Incident Description</p>
                                     <p className="text-sm font-black text-gray-900 leading-relaxed">{selectedTicket.description}</p>
                                     {selectedTicket.imageAttachments?.length > 0 && (
-                                        <div className="mt-6 flex flex-wrap gap-3">
-                                            {selectedTicket.imageAttachments.map((img, i) => (
-                                                <div key={i} className="w-20 h-20 rounded-xl bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-400">
-                                                    <Paperclip className="w-7 h-7" />
-                                                </div>
-                                            ))}
+                                        <div className="mt-6 space-y-3">
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Attachments</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {selectedTicket.imageAttachments.map((attachmentPath, i) => {
+                                                    const preview = attachmentPreviews[attachmentPath];
+                                                    const name = preview?.name || getAttachmentDisplayName(attachmentPath);
+                                                    const url = preview?.url;
+                                                    const isImage = isImageFile(name, preview?.type);
+                                                    const isPdf = isPdfFile(name, preview?.type);
+
+                                                    return (
+                                                        <div key={`${attachmentPath}-${i}`} className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                                                            {url && isImage && (
+                                                                <a href={url} target="_blank" rel="noreferrer" className="block">
+                                                                    <img src={url} alt={name} className="w-full h-40 object-cover" />
+                                                                </a>
+                                                            )}
+
+                                                            {url && isPdf && (
+                                                                <div className="h-40 bg-gray-50">
+                                                                    <iframe title={name} src={url} className="w-full h-full" />
+                                                                </div>
+                                                            )}
+
+                                                            {(!url || (!isImage && !isPdf)) && (
+                                                                <div className="h-40 bg-gray-50 border-b border-gray-200 flex items-center justify-center text-gray-400">
+                                                                    <Paperclip className="w-8 h-8" />
+                                                                </div>
+                                                            )}
+
+                                                            <div className="p-3 flex items-center justify-between gap-3">
+                                                                <p className="text-[10px] font-black text-gray-700 truncate" title={name}>{name}</p>
+                                                                {url && (
+                                                                    <a href={url} target="_blank" rel="noreferrer" className="text-[9px] font-black uppercase tracking-wider text-accent-1 hover:text-accent-2">
+                                                                        Open
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
