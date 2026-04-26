@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,49 @@ public class TicketService {
         }
     }
 
+    public IncidentTicket updateTicket(
+            String id,
+            String resourceId,
+            String location,
+            String category,
+            String description,
+            String priority,
+            String contactDetails,
+            String actorEmail,
+            boolean canManageAll
+    ) {
+        IncidentTicket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (!canManageAll && !Objects.equals(ticket.getReporterEmail(), actorEmail)) {
+            throw new RuntimeException("Not authorized to update this ticket");
+        }
+
+        if (resourceId != null) ticket.setResourceId(resourceId);
+        if (location != null) ticket.setLocation(location);
+        if (category != null) ticket.setCategory(category);
+        if (description != null) ticket.setDescription(description);
+        if (priority != null) ticket.setPriority(priority);
+        if (contactDetails != null) ticket.setContactDetails(contactDetails);
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return ticketRepository.save(ticket);
+    }
+
+    public void deleteTicket(String id, String actorEmail, boolean canManageAll) {
+        IncidentTicket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (!canManageAll && !Objects.equals(ticket.getReporterEmail(), actorEmail)) {
+            throw new RuntimeException("Not authorized to delete this ticket");
+        }
+
+        if (ticket.getImageAttachments() != null) {
+            ticket.getImageAttachments().forEach(this::deleteStoredAttachment);
+        }
+        ticketRepository.deleteById(id);
+    }
+
     private String storeAttachment(MultipartFile file) {
         try {
             String originalName = file.getOriginalFilename() == null ? "attachment" : file.getOriginalFilename();
@@ -100,6 +144,21 @@ public class TicketService {
             return "/api/tickets/attachments/" + storedName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to save attachment", e);
+        }
+    }
+
+    private void deleteStoredAttachment(String attachmentPath) {
+        if (attachmentPath == null || !attachmentPath.startsWith("/api/tickets/attachments/")) {
+            return;
+        }
+        try {
+            String filename = attachmentPath.substring("/api/tickets/attachments/".length());
+            Path target = uploadsDir.resolve(filename).normalize();
+            if (target.startsWith(uploadsDir)) {
+                Files.deleteIfExists(target);
+            }
+        } catch (IOException ignored) {
+            // Best effort cleanup; ticket deletion should still continue.
         }
     }
 

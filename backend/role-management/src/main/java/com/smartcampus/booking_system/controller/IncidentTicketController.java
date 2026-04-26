@@ -55,6 +55,39 @@ public class IncidentTicketController {
         return ticketService.createTicket(ticket, attachments);
     }
 
+    @PatchMapping("/{id}")
+    public IncidentTicket updateTicket(@PathVariable String id, @RequestBody Map<String, String> payload, Authentication auth) {
+        boolean canManageAll = auth.getAuthorities().stream().anyMatch(a ->
+                "ROLE_ADMIN".equals(a.getAuthority()) ||
+                "ROLE_STAFF".equals(a.getAuthority()) ||
+                "ROLE_TECHNICIAN".equals(a.getAuthority())
+        );
+
+        return ticketService.updateTicket(
+                id,
+                payload.get("resourceId"),
+                payload.get("location"),
+                payload.get("category"),
+                payload.get("description"),
+                payload.get("priority"),
+                payload.get("contactDetails"),
+                auth.getName(),
+                canManageAll
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicket(@PathVariable String id, Authentication auth) {
+        boolean canManageAll = auth.getAuthorities().stream().anyMatch(a ->
+                "ROLE_ADMIN".equals(a.getAuthority()) ||
+                "ROLE_STAFF".equals(a.getAuthority()) ||
+                "ROLE_TECHNICIAN".equals(a.getAuthority())
+        );
+
+        ticketService.deleteTicket(id, auth.getName(), canManageAll);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/attachments/{filename:.+}")
     public ResponseEntity<Resource> getAttachment(@PathVariable String filename) {
         Resource resource = ticketService.loadAttachmentAsResource(filename);

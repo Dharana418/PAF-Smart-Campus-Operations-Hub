@@ -6,6 +6,7 @@ export default function IncidentTicketingPage({ user }) {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showNewModal, setShowNewModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [resources, setResources] = useState([]);
     const [attachments, setAttachments] = useState([]);
@@ -18,11 +19,20 @@ export default function IncidentTicketingPage({ user }) {
         priority: 'MEDIUM',
         contactDetails: ''
     });
+    const [editTicket, setEditTicket] = useState({
+        resourceId: '',
+        location: '',
+        category: 'Hardware',
+        description: '',
+        priority: 'MEDIUM',
+        contactDetails: ''
+    });
     const [commentText, setCommentText] = useState('');
     const fileInputRef = useRef(null);
 
     const isStaffOrAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_STAFF' || user?.role === 'ROLE_TECHNICIAN';
     const isTechnician = user?.role === 'ROLE_TECHNICIAN' || user?.role === 'ROLE_ADMIN';
+    const canModifySelectedTicket = !!selectedTicket && (isStaffOrAdmin || selectedTicket.reporterEmail === user?.email);
 
     useEffect(() => {
         loadData();
@@ -162,6 +172,50 @@ export default function IncidentTicketingPage({ user }) {
         }
     };
 
+    const openEditTicketModal = () => {
+        if (!selectedTicket) return;
+        setEditTicket({
+            resourceId: selectedTicket.resourceId || '',
+            location: selectedTicket.location || '',
+            category: selectedTicket.category || 'Hardware',
+            description: selectedTicket.description || '',
+            priority: selectedTicket.priority || 'MEDIUM',
+            contactDetails: selectedTicket.contactDetails || ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateTicket = async (e) => {
+        e.preventDefault();
+        if (!selectedTicket) return;
+        try {
+            await apiClient.patch(`/tickets/${selectedTicket.id}`, editTicket);
+            setShowEditModal(false);
+            await loadData();
+            const refreshed = await apiClient.get(isStaffOrAdmin ? '/tickets' : '/tickets/my');
+            const updatedTicket = refreshed.data.find(t => t.id === selectedTicket.id);
+            setTickets(refreshed.data);
+            setSelectedTicket(updatedTicket || null);
+            alert('Ticket updated successfully.');
+        } catch (err) {
+            alert('Failed to update ticket');
+        }
+    };
+
+    const handleDeleteTicket = async () => {
+        if (!selectedTicket) return;
+        const ok = window.confirm('Delete this ticket permanently? This action cannot be undone.');
+        if (!ok) return;
+        try {
+            await apiClient.delete(`/tickets/${selectedTicket.id}`);
+            setSelectedTicket(null);
+            await loadData();
+            alert('Ticket deleted successfully.');
+        } catch (err) {
+            alert('Failed to delete ticket');
+        }
+    };
+
     const getPriorityColor = (priority) => {
         switch (priority) {
             case 'CRITICAL': return 'text-red-500 bg-red-100';
@@ -254,15 +308,33 @@ export default function IncidentTicketingPage({ user }) {
                                     </div>
                                     <p className="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Category: {selectedTicket.category}</p>
                                 </div>
-                                {isTechnician && selectedTicket.status !== 'RESOLVED' && (
-                                    <button
-                                        onClick={() => updateTicketStatus('RESOLVED')}
-                                        className="btn btn-primary px-6 py-3 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
-                                    >
-                                        <CheckCircle className="w-4 h-4" />
-                                        Mark Resolved
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-3">
+                                    {canModifySelectedTicket && (
+                                        <>
+                                            <button
+                                                onClick={openEditTicketModal}
+                                                className="px-4 py-2 rounded-xl border border-gray-300 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-100 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={handleDeleteTicket}
+                                                className="px-4 py-2 rounded-xl border border-red-300 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </>
+                                    )}
+                                    {isTechnician && selectedTicket.status !== 'RESOLVED' && (
+                                        <button
+                                            onClick={() => updateTicketStatus('RESOLVED')}
+                                            className="btn btn-primary px-6 py-3 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                                        >
+                                            <CheckCircle className="w-4 h-4" />
+                                            Mark Resolved
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-8 space-y-8">
@@ -493,6 +565,91 @@ export default function IncidentTicketingPage({ user }) {
                                     className="flex-[2] btn btn-primary py-4 text-xs font-black uppercase tracking-widest bg-red-600 hover:bg-red-700"
                                 >
                                     Submit Ticket
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showEditModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowEditModal(false)} />
+                    <div className="bg-white rounded-[40px] w-full max-w-xl p-10 relative z-10 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center">
+                                <MessageSquare className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-3xl font-heading font-black text-gray-900 uppercase tracking-tighter">Edit Incident</h3>
+                        </div>
+
+                        <form onSubmit={handleUpdateTicket} className="space-y-6 text-left">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Affected Facility</label>
+                                    <select
+                                        className="premium-input !bg-gray-50 !text-gray-900"
+                                        required
+                                        value={editTicket.resourceId}
+                                        onChange={e => {
+                                            const r = resources.find(res => res.id === e.target.value);
+                                            setEditTicket({ ...editTicket, resourceId: e.target.value, location: r?.location || '' });
+                                        }}
+                                    >
+                                        <option value="">Select Resource...</option>
+                                        {resources.map(r => (
+                                            <option key={r.id} value={r.id}>{r.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Priority Level</label>
+                                    <select
+                                        className="premium-input !bg-gray-50 !text-gray-900"
+                                        value={editTicket.priority}
+                                        onChange={e => setEditTicket({ ...editTicket, priority: e.target.value })}
+                                    >
+                                        <option>LOW</option>
+                                        <option>MEDIUM</option>
+                                        <option>HIGH</option>
+                                        <option>CRITICAL</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Description of Issue</label>
+                                <textarea
+                                    rows={4}
+                                    className="premium-input !bg-gray-50 !text-gray-900 resize-none"
+                                    required
+                                    value={editTicket.description}
+                                    onChange={e => setEditTicket({ ...editTicket, description: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Contact Details</label>
+                                <input
+                                    className="premium-input !bg-gray-50 !text-gray-900"
+                                    value={editTicket.contactDetails}
+                                    onChange={e => setEditTicket({ ...editTicket, contactDetails: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEditModal(false)}
+                                    className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-[2] btn btn-primary py-4 text-xs font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-700"
+                                >
+                                    Save Changes
                                 </button>
                             </div>
                         </form>
