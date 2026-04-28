@@ -30,6 +30,12 @@ export default function ResourceCataloguePage({ user }) {
         loadResources();
     }, []);
 
+    const parseCapacity = (value) => {
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isNaN(parsed)) return 1;
+        return Math.max(1, parsed);
+    };
+
     const loadResources = async () => {
         try {
             setLoading(true);
@@ -44,6 +50,10 @@ export default function ResourceCataloguePage({ user }) {
 
     const handleAddResource = async (e) => {
         e.preventDefault();
+        if (newResource.capacity < 1) {
+            alert('Capacity must be at least 1');
+            return;
+        }
         try {
             await apiClient.post('/facilities/resources', newResource);
             setShowAddModal(false);
@@ -77,6 +87,10 @@ export default function ResourceCataloguePage({ user }) {
 
     const handleUpdateResource = async (e) => {
         e.preventDefault();
+        if (editResource.capacity < 1) {
+            alert('Capacity must be at least 1');
+            return;
+        }
         try {
             await apiClient.put(`/facilities/resources/${editingResource.id}`, editResource);
             setEditingResource(null);
@@ -220,10 +234,11 @@ export default function ResourceCataloguePage({ user }) {
                                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Capacity</label>
                                     <input 
                                         type="number"
+                                        min="1"
                                         className="premium-input !bg-gray-50 !text-gray-900"
                                         required
                                         value={newResource.capacity}
-                                        onChange={e => setNewResource({...newResource, capacity: parseInt(e.target.value)})}
+                                        onChange={e => setNewResource({...newResource, capacity: parseCapacity(e.target.value)})}
                                     />
                                 </div>
                             </div>
@@ -278,10 +293,11 @@ export default function ResourceCataloguePage({ user }) {
                                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Capacity</label>
                                     <input 
                                         type="number"
+                                        min="1"
                                         className="premium-input !bg-gray-50 !text-gray-900"
                                         required
                                         value={editResource.capacity}
-                                        onChange={e => setEditResource({ ...editResource, capacity: parseInt(e.target.value) })}
+                                        onChange={e => setEditResource({ ...editResource, capacity: parseCapacity(e.target.value) })}
                                     />
                                 </div>
                             </div>

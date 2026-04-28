@@ -1,5 +1,7 @@
 package com.smartcampus.booking_system.model;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ public class Resource {
     
     private String name;
     private String type; // ROOM, LAB, EQUIPMENT
+    @NotNull(message = "Capacity is required")
+    @Min(value = 1, message = "Capacity must be at least 1")
     private Integer capacity;
     private String location;
     
