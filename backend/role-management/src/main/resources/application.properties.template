@@ -1,0 +1,24 @@
+spring.application.name=booking-system
+
+server.port=8081
+
+# ─── Google OAuth2 ────────────────────────────────────────────────────────────
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8081/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.scope=openid,profile,email
+
+# ─── JWT & Security ───────────────────────────────────────────────────────────
+app.security.jwt.secret=REPLACE_WITH_64_CHAR_RANDOM_SECRET
+app.security.jwt.expiration-minutes=120
+app.security.allowed-origins=http://localhost:5173
+app.security.admin-emails=admin@smartcampus.com
+app.frontend.redirect-uri=http://localhost:5173/oauth/success
+
+# ─── Seed Admin Account (for dev-login) ───────────────────────────────────────
+app.seed.admin-email=admin@smartcampus.com
+app.seed.admin-name=Admin
+app.seed.admin-password=REPLACE_WITH_STRONG_PASSWORD
+
+# ─── MongoDB ──────────────────────────────────────────────────────────────────
+spring.data.mongodb.uri=mongodb://localhost:27017/booking_system
